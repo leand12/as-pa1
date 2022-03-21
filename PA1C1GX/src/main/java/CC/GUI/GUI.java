@@ -4,6 +4,8 @@
  */
 package CC.GUI;
 
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author guids
@@ -125,6 +127,11 @@ public class GUI extends javax.swing.JFrame {
         resumeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resume.png"))); // NOI18N
         resumeButton.setBorder(null);
         resumeButton.setEnabled(false);
+        resumeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resumeButtonActionPerformed(evt);
+            }
+        });
 
         jLabel11.setText("Suspend");
 
@@ -144,12 +151,22 @@ public class GUI extends javax.swing.JFrame {
         stopButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stop.png"))); // NOI18N
         stopButton.setBorder(null);
         stopButton.setEnabled(false);
+        stopButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stopButtonActionPerformed(evt);
+            }
+        });
 
         jLabel13.setText("End");
 
         endButton.setBackground(javax.swing.UIManager.getDefaults().getColor("window"));
         endButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/exit.png"))); // NOI18N
         endButton.setBorder(null);
+        endButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                endButtonActionPerformed(evt);
+            }
+        });
 
         jLabel14.setText("Start");
 
@@ -386,8 +403,33 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void suspendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suspendButtonActionPerformed
-        // TODO add your handling code here:
+        suspendButton.setEnabled(false);
+        resumeButton.setEnabled(true);
+        stopButton.setEnabled(true);
     }//GEN-LAST:event_suspendButtonActionPerformed
+
+    private void resumeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resumeButtonActionPerformed
+        resumeButton.setEnabled(false);
+        suspendButton.setEnabled(true);
+        stopButton.setEnabled(true);
+    }//GEN-LAST:event_resumeButtonActionPerformed
+
+    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+        // TODO add your handling code here:
+        stopButton.setEnabled(false);
+        startButton.setEnabled(true);
+        resumeButton.setEnabled(false);
+        suspendButton.setEnabled(false);
+    }//GEN-LAST:event_stopButtonActionPerformed
+
+    private void endButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endButtonActionPerformed
+        // TODO add your handling code here:
+        int answer  = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?\n","Exit" , JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if(answer == JOptionPane.YES_OPTION){
+            System.exit(0);
+        }
+    }//GEN-LAST:event_endButtonActionPerformed
 
     /**
      * @param args the command line arguments
