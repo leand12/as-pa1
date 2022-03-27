@@ -4,11 +4,11 @@
  */
 package HC;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import HC.GUI.GUI;
+import HC.SocketServer.TSocketServer;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.swing.JFrame;
 
 /**
  *
@@ -20,29 +20,27 @@ public class Main {
     
     public static void main(String[ ] args) {
         
+        JFrame frame = new GUI();
+        frame.setVisible(true);
+        
         System.out.println("HC begining:");
         
         try{ 
             ServerSocket serverSocket = new ServerSocket(portNumber);
-            Socket clientSocket = serverSocket.accept();
-            System.out.println(clientSocket.getLocalSocketAddress());
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
             
-            String inputLine;
-            out.println("Hello, this is HC");
-            while (true) { 
-                if((inputLine = in.readLine()) != null){
-                    System.out.println(inputLine);
-                }
-                
+            // wait for clients to join
+            while(true){
+                Socket clientSocket = serverSocket.accept();
+                TSocketServer socket = new TSocketServer(clientSocket);
+                socket.start();
             }
+            
+           
         }
         catch(Exception e){
-
+            System.err.println("Socket error");
         }
     }
     
     
-
 }
