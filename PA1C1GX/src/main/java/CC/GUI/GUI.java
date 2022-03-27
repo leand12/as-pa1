@@ -399,6 +399,13 @@ public class GUI extends javax.swing.JFrame {
         startButton.setEnabled(false);
         suspendButton.setEnabled(true);
         stopButton.setEnabled(true);
+        NoA.setEnabled(false);
+        NoC.setEnabled(false);
+        NoS.setEnabled(false);
+        PT.setEnabled(false);
+        ET.setEnabled(false);
+        MAT.setEnabled(false);
+        TTM.setEnabled(false);
         
     }//GEN-LAST:event_startButtonActionPerformed
 
@@ -427,6 +434,13 @@ public class GUI extends javax.swing.JFrame {
         ET.setSelectedIndex(1);
         MAT.setSelectedIndex(1);
         TTM.setSelectedIndex(1);
+        NoA.setEnabled(true);
+        NoC.setEnabled(true);
+        NoS.setEnabled(true);
+        PT.setEnabled(true);
+        ET.setEnabled(true);
+        MAT.setEnabled(true);
+        TTM.setEnabled(true);
     }//GEN-LAST:event_stopButtonActionPerformed
 
     private void endButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endButtonActionPerformed
