@@ -31,8 +31,11 @@ public class Main {
             
             String inputLine;
             out.println("Hello, this is HC");
-            while ((inputLine = in.readLine()) != null) {               
-                System.out.println(inputLine);
+            while (true) { 
+                if((inputLine = in.readLine()) != null){
+                    System.out.println(inputLine);
+                }
+                
             }
         }
         catch(Exception e){

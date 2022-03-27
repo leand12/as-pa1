@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package CC.GUI;
+import CC.Socket.ClientSocket;
 
 import javax.swing.JOptionPane;
 
@@ -11,11 +12,15 @@ import javax.swing.JOptionPane;
  * @author guids
  */
 public class GUI extends javax.swing.JFrame {
+    
+    private ClientSocket socket;
 
     /**
      * Creates new form GUI
+     * @param socket
      */
-    public GUI() {
+    public GUI(ClientSocket socket) {
+        this.socket = socket; 
         initComponents();
     }
 
@@ -187,7 +192,7 @@ public class GUI extends javax.swing.JFrame {
         jLabel16.setText("Operation");
         jLabel16.setToolTipText("");
 
-        opertationModeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Auto", "Manual" }));
+        opertationModeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "AUTO", "MANUAL" }));
         opertationModeCombo.setAutoscrolls(true);
         opertationModeCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -382,6 +387,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void movePatientButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_movePatientButtonActionPerformed
         // TODO add your handling code here:
+        this.socket.sendMessage("NEXT");
     }//GEN-LAST:event_movePatientButtonActionPerformed
 
     private void opertationModeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opertationModeComboActionPerformed
@@ -391,6 +397,10 @@ public class GUI extends javax.swing.JFrame {
         }
         else{
             movePatientButton.setEnabled(true);
+        }
+        // Send updated mode if during a simulation
+        if(!startButton.isEnabled()){
+            this.socket.sendMessage(String.format("MODE:%s",  opertationModeCombo.getSelectedItem()));
         }
     }//GEN-LAST:event_opertationModeComboActionPerformed
 
@@ -406,6 +416,10 @@ public class GUI extends javax.swing.JFrame {
         ET.setEnabled(false);
         MAT.setEnabled(false);
         TTM.setEnabled(false);
+        
+        // Send configuration message for the CCP to start the simulation
+        this.socket.sendMessage(String.format("CONFIG:%d:%d:%s:%s:%s:%s:%s:%s",NoA.getValue(), NoC.getValue(), NoS.getSelectedItem(), 
+                PT.getSelectedItem(), ET.getSelectedItem(), MAT.getSelectedItem(), TTM.getSelectedItem(), opertationModeCombo.getSelectedItem() ));
         
     }//GEN-LAST:event_startButtonActionPerformed
 
@@ -448,6 +462,8 @@ public class GUI extends javax.swing.JFrame {
         int answer  = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?\n","Exit" , JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         
         if(answer == JOptionPane.YES_OPTION){
+            this.socket.sendMessage("END");
+            this.socket.closeSocket();
             System.exit(0);
         }
     }//GEN-LAST:event_endButtonActionPerformed
@@ -482,7 +498,7 @@ public class GUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GUI().setVisible(true);
+                new GUI(null).setVisible(true);
             }
         });
     }

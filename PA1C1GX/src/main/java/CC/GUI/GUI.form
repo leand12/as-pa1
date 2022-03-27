@@ -566,8 +566,8 @@
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="2">
-            <StringItem index="0" value="Auto"/>
-            <StringItem index="1" value="Manual"/>
+            <StringItem index="0" value="AUTO"/>
+            <StringItem index="1" value="MANUAL"/>
           </StringArray>
         </Property>
         <Property name="autoscrolls" type="boolean" value="true"/>
