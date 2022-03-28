@@ -20,14 +20,13 @@ public class TSocketServer extends Thread{
     
     public TSocketServer(Socket socket){
         this.socket = socket;
-        System.out.println("Aqui");
+
     }
     
     @Override
     public void run(){
         
         try {
-            System.out.println("Ali");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
             String inputLine;
