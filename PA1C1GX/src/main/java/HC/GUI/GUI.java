@@ -1,5 +1,7 @@
 package HC.GUI;
 
+import HC.Threads.DoS;
+import HC.Threads.TPatient;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -10,6 +12,10 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 
 public class GUI extends JFrame {
 
@@ -35,9 +41,53 @@ public class GUI extends JFrame {
     private JScrollPane pyh;
     private JPanel cashier;
     private JScrollPane out;
+    private SeatsGraphics test;
 
     public GUI() {
         initComponents();
+        displaySimulation();
+    }
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(GUI::new);
+    }
+
+    public void displaySimulation() {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        String message = "CONFIG";
+        System.out.println("ok");
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+        test.repaint();
+//        while (true) {
+//            switch (message) {
+//                case "CONFIG":
+//                    //TODO: show config and all defined patients on entrance
+//                    break;
+//                case "MOVE":
+//                    //TODO: tp object to another room
+//                    break;
+//                case "EVAL":
+//                    //TODO: change object color
+//                    break;
+//            }
+//            try {
+//                TimeUnit.SECONDS.sleep(1);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void initComponents() {
@@ -45,50 +95,42 @@ public class GUI extends JFrame {
         formattedTextField2.setText("YY");
         formattedTextField3.setText("ZZ");
 
-        etr1.setLayout(new GridLayout(1, 1));
-        etr1.add(new SeatsGraphics(5, 0, 5));
-        etr2.setLayout(new GridLayout(1, 1));
+        for (JComponent c : new JPanel[]{etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
+                mdw, mdr1, mdr2, mdr3, mdr4, cashier}) {
+            c.setLayout(new GridLayout(1, 1));
+        }
+
+        test = new SeatsGraphics(5, 0, 5);
+
+        etr1.add(test);
+
         etr2.add(new SeatsGraphics(5, 5, 0));
 
-        evr1.setLayout(new GridLayout(1, 1));
         evr1.add(new SeatsGraphics(1, 0, 0));
-        evr2.setLayout(new GridLayout(1, 1));
         evr2.add(new SeatsGraphics(1, 0, 0));
-        evr3.setLayout(new GridLayout(1, 1));
         evr3.add(new SeatsGraphics(1, 0, 0));
-        evr4.setLayout(new GridLayout(1, 1));
         evr4.add(new SeatsGraphics(1, 0, 0));
 
-        wtr1.setLayout(new GridLayout(1, 1));
         wtr1.add(new SeatsGraphics(5, 0, 5));
-        wtr2.setLayout(new GridLayout(1, 1));
         wtr2.add(new SeatsGraphics(5, 5, 0));
 
-        mdw.setLayout(new GridLayout(1, 1));
         mdw.add(new SeatsGraphics(2, 1, 1));
 
-        mdr1.setLayout(new GridLayout(1, 1));
         mdr1.add(new SeatsGraphics(1, 0, 1));
-        mdr2.setLayout(new GridLayout(1, 1));
         mdr2.add(new SeatsGraphics(1, 0, 1));
-        mdr3.setLayout(new GridLayout(1, 1));
         mdr3.add(new SeatsGraphics(1, 1, 0));
-        mdr4.setLayout(new GridLayout(1, 1));
         mdr4.add(new SeatsGraphics(1, 1, 0));
 
-        cashier.setLayout(new GridLayout(1, 1));
         cashier.add(new SeatsGraphics(1, 0, 0));
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("HC GUI");
+
         add(panel1);
         pack();
         setLocationByPlatform(true);
         setVisible(true);
-    }
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(GUI::new);
     }
 
     {
@@ -270,63 +312,120 @@ public class GUI extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
+
 }
 
-class SeatsGraphics extends JComponent {
+class SeatsGraphics extends JPanel {
     private static final int P = 5;
     private static final int R = 30;
     private static final int D = 2 * R;
+    private int count = 0;
+    private int id;
+    private static int c = 0;
 
-    private int numberOfSeats;
-    private int numberOfAdultSeats;
-    private int numberOfChildSeats;
-    private Patient[] patients;
+    private final int numberOfSeats;
+    private final int numberOfAdultSeats;
+    private final int numberOfChildSeats;
+    private TPatient[] patients;
+
+    private Graphics2D g2;
 
     SeatsGraphics(int numberOfSeats, int numberOfAdultSeats, int numberOfChildSeats) {
+        this.id = c++;
         this.numberOfSeats = numberOfSeats;
         this.numberOfAdultSeats = numberOfAdultSeats;
         this.numberOfChildSeats = numberOfChildSeats;
-        this.patients = new Patient[numberOfSeats];
+        this.patients = new TPatient[numberOfSeats];
+    }
+
+    public void addPatient(TPatient patient) {
+        assert !Arrays.asList(patients).contains(patient);
+
+        for (int i = 0; i < numberOfSeats; i++) {
+            if (patients[i] == null) {
+                // found empty seat, assign patient
+                patients[i] = patient;
+                repaint();
+                return;
+            }
+        }
+        assert false;
+    }
+
+    public void removePatient(TPatient patient) {
+        for (int i = 0; i < numberOfSeats; i++) {
+            if (patients[i] == patient) {
+                // remove patient from seat
+                patients[i] = null;
+                repaint();
+                return;
+            }
+        }
+        assert false;
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        this.g2 = g2;
         g2.setPaint(Color.LIGHT_GRAY);
 
-        for (int y = 0; y <= numberOfSeats/3; y++) {
+        for (int y = 0; y <= numberOfSeats / 3; y++) {
             for (int x = 0; x < 3; x++) {
-                int seat = 3*y + x;
+                int seat = 3 * y + x;
                 if (seat >= numberOfSeats) break;
 
                 if (seat < numberOfChildSeats) {
-                    Ellipse2D shape = new Ellipse2D.Double(x*D + P, y*D + P, D - P, D - P);
-                    g2.fill(shape);
+                    paintCircle(g2, x, y);
                 } else if (seat < numberOfAdultSeats + numberOfChildSeats) {
-                    Path2D path = new Path2D.Double();
-                    path.moveTo(x*D + P, y*D + D - P);
-                    path.lineTo(x*D + D - P, y*D + D - P);
-                    path.lineTo(x*D + D / 2.0, y*D + P);
-                    path.closePath();
-                    g2.fill(path);
+                    paintTriangle(g2, x, y);
                 } else {
-                    Rectangle2D shape = new Rectangle2D.Double(x*D + P, y*D + P, D - P, D - P);
-                    g2.fill(shape);
+                    paintSquare(g2, x, y);
+                }
+            }
+        }
+
+        for (int y = 0; y <= numberOfSeats / 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                int seat = 3 * y + x;
+                if (seat >= numberOfSeats) break;
+
+                TPatient patient = patients[seat];
+                if (patient == null) continue;
+
+                switch (patient.getDos()) {
+                    case RED -> g2.setPaint(Color.RED);
+                    case YELLOW -> g2.setPaint(Color.YELLOW);
+                    case BLUE -> g2.setPaint(Color.BLUE);
+                    default -> g2.setPaint(Color.LIGHT_GRAY);
+                }
+
+                if (patient.isAdult()) {
+                    paintTriangle(g2, x, y);
+                } else {
+                    paintCircle(g2, x, y);
                 }
             }
         }
     }
-}
 
-class Patient {
-    private DoS degreeOfSeverity;
-    private boolean isAdult;
-}
+    private void paintSquare(Graphics2D g2, int x, int y) {
+        Rectangle2D shape = new Rectangle2D.Double(x * D + P, y * D + P, D - P, D - P);
+        g2.fill(shape);
+    }
 
-enum DoS {
-    RED,
-    YELLOW,
-    BLUE,
-    NONE
+    private void paintTriangle(Graphics2D g2, int x, int y) {
+        Path2D path = new Path2D.Double();
+        path.moveTo(x * D + P, y * D + D - P);
+        path.lineTo(x * D + D - P, y * D + D - P);
+        path.lineTo(x * D + D / 2.0, y * D + P);
+        path.closePath();
+        g2.fill(path);
+    }
+
+    private void paintCircle(Graphics2D g2, int x, int y) {
+        Ellipse2D shape = new Ellipse2D.Double(x * D + P, y * D + P, D - P, D - P);
+        g2.fill(shape);
+    }
 }
