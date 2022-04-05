@@ -6,8 +6,11 @@ package HC;
 
 import HC.GUI.GUI;
 import HC.SocketServer.TSocketServer;
+import HC.Threads.TPatient;
+
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 
 /**
@@ -18,11 +21,10 @@ public class Main {
     
     final static int portNumber = 5000;
     
-    public static void main(String[ ] args) {
+    public static void main(String[] args) {
         
-        JFrame frame = new GUI();
-        frame.setVisible(true);
-        
+        GUI frame = new GUI(2, 2, 10);
+
         System.out.println("HC begining:");
         
         try{ 
@@ -41,6 +43,5 @@ public class Main {
             System.err.println("Socket error");
         }
     }
-    
     
 }
