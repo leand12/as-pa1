@@ -6,12 +6,9 @@ package HC;
 
 import HC.Main.GUI;
 import HC.Comunication.TSocketHandler;
-import HC.Entities.TPatient;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.TimeUnit;
-import javax.swing.JFrame;
 
 /**
  *
@@ -36,12 +33,9 @@ public class HC_Process {
                 TSocketHandler socket = new TSocketHandler(clientSocket);
                 socket.start();
             }
-            
-           
         }
         catch(Exception e){
             System.err.println("Socket error");
         }
     }
-    
 }

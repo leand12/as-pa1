@@ -4,8 +4,10 @@
  */
 package HC.Comunication;
 
-import HC.Monitors.METH;
+import HC.Entities.TCallCenter;
+import HC.Monitors.*;
 import HC.Entities.TPatient;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,6 +26,7 @@ public class TSocketHandler extends Thread {
 
     @Override
     public void run() {
+        TCallCenter callCenter = null;
 
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -49,9 +52,15 @@ public class TSocketHandler extends Thread {
                             MAT = Integer.parseInt(clientMessage[6]);
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
-                            
-                            // Create Monitor
+
+                            // Create Monitors
                             METH meth = new METH(NoS);
+                            MEVH mevh = new MEVH();
+                            MWTH mwth = new MWTH();
+                            MMDH mmdh = new MMDH();
+                            MPYH mpyh = new MPYH();
+
+                            callCenter = new TCallCenter(meth, mevh, mwth, mmdh, mpyh);
                             
                             // Create Adult Patients
                             for(int i =0; i<NoA; i++){
@@ -67,10 +76,14 @@ public class TSocketHandler extends Thread {
                             
                             break;
                         case "MODE":
-                            //TODO
+                            if (clientMessage[1] == "AUT") {
+                                callCenter.setAuto(true);
+                            } else if (clientMessage[1] == "MAN") {
+                                callCenter.setAuto(false);
+                            }
                             break;
                         case "NEXT":
-                            //TODO
+                            callCenter.allowNextPatient();
                             break;
                         case "END":
                             socket.close();
