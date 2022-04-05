@@ -4,22 +4,30 @@
  */
 package HC.Entities;
 
-import HC.Monitors.METH;
+import HC.Monitors.*;
 
 /**
  *
  * @author guids
  */
 public class TPatient extends Thread {
-    
-    private METH ETH;           // entrance hall
+    private final METH eth;         // entrance hall
+    private final MEVH evh;         // evaluation hall
+    private final MWTH wth;         // waiting hall
+    private final MMDH mdh;         // medical hall
+    private final MPYH pyh;         // payment hall
+
     private int ETN;            // entrance hall number
     private boolean isAdult;
     private DoS dos = DoS.NONE;            // degree of severity
 
-    public TPatient(boolean isAdult, METH ETH) {
+    public TPatient(boolean isAdult, METH eth, MEVH evh, MWTH wth, MMDH mdh, MPYH pyh) {
         this.isAdult = isAdult;
-        this.ETH = ETH;
+        this.eth = eth;
+        this.evh = evh;
+        this.wth = wth;
+        this.mdh = mdh;
+        this.pyh = pyh;
     }
     
     public boolean isAdult(){
@@ -38,8 +46,8 @@ public class TPatient extends Thread {
     
     @Override
     public void run(){
-
-        this.ETH.put(this);
+        this.eth.put(this);
+        // TODO
     }
     
 }

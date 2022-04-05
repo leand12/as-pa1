@@ -5,8 +5,8 @@
 package HC.Comunication;
 
 import HC.Entities.TCallCenter;
-import HC.Monitors.*;
 import HC.Entities.TPatient;
+import HC.Monitors.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class TSocketHandler extends Thread {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             String inputLine;
-            
+
             int NoA, NoC, NoS, PT, ET, MAT, TTM;
             String mode;
 
@@ -54,36 +54,40 @@ public class TSocketHandler extends Thread {
                             mode = clientMessage[8];
 
                             // Create Monitors
-                            METH meth = new METH(NoS);
-                            MEVH mevh = new MEVH();
-                            MWTH mwth = new MWTH();
-                            MMDH mmdh = new MMDH();
-                            MPYH mpyh = new MPYH();
+                            var eth = new METH(NoS);
+                            var evh = new MEVH();
+                            var wth = new MWTH();
+                            var mdh = new MMDH();
+                            var pyh = new MPYH();
 
-                            callCenter = new TCallCenter(meth, mevh, mwth, mmdh, mpyh);
-                            
+                            callCenter = new TCallCenter(eth, evh, wth, mdh, pyh);
+
                             // Create Adult Patients
-                            for(int i =0; i<NoA; i++){
-                                TPatient p = new TPatient(true, meth);
+                            for (var i = 0; i < NoA; i++) {
+                                var p = new TPatient(true, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
-                            
+
                             // Create Child Patients
-                            for(int i =0; i<NoA; i++){
-                                TPatient p = new TPatient(false, meth);
+                            for (var i = 0; i < NoA; i++) {
+                                var p = new TPatient(false, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
-                            
+
                             break;
                         case "MODE":
-                            if (clientMessage[1] == "AUT") {
-                                callCenter.setAuto(true);
-                            } else if (clientMessage[1] == "MAN") {
-                                callCenter.setAuto(false);
+                            if (callCenter != null) {
+                                if (clientMessage[1].equals("AUT")) {
+                                    callCenter.setAuto(true);
+                                } else if (clientMessage[1].equals("MAN")) {
+                                    callCenter.setAuto(false);
+                                }
                             }
                             break;
                         case "NEXT":
-                            callCenter.allowNextPatient();
+                            if (callCenter != null) {
+                                callCenter.allowNextPatient();
+                            }
                             break;
                         case "END":
                             socket.close();

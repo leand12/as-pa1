@@ -3,21 +3,21 @@ package HC.Entities;
 import HC.Monitors.*;
 
 public class TCallCenter extends Thread {
-    private final METH ETH;         // entrance hall
-    private final MEVH EVH;         // evaluation hall
-    private final MWTH WTH;         // waiting hall
-    private final MMDH MDH;         // medical hall
-    private final MPYH PYH;         // payment hall
+    private final METH eth;         // entrance hall
+    private final MEVH evh;         // evaluation hall
+    private final MWTH wth;         // waiting hall
+    private final MMDH mdh;         // medical hall
+    private final MPYH pyh;         // payment hall
 
     private boolean auto = true;
     private boolean next = false;
 
-    public TCallCenter(METH ETH, MEVH EVH, MWTH WTH, MMDH MDH, MPYH PYH) {
-        this.ETH = ETH;
-        this.EVH = EVH;
-        this.WTH = WTH;
-        this.MDH = MDH;
-        this.PYH = PYH;
+    public TCallCenter(METH eth, MEVH evh, MWTH wth, MMDH mdh, MPYH pyh) {
+        this.eth = eth;
+        this.evh = evh;
+        this.wth = wth;
+        this.mdh = mdh;
+        this.pyh = pyh;
     }
 
     public void setAuto(boolean auto) {
@@ -28,24 +28,24 @@ public class TCallCenter extends Thread {
         this.next = true;
     }
 
-    private boolean canCallPatient(IMonitor monitor1, IMonitor monitor2) {
-        return (monitor1.hasAdults() && !monitor2.isFullOfAdults()) ||
-                (monitor1.hasChildren() && !monitor2.isFullOfChildren());
+    private boolean canCallPatient(IMonitor m1, IMonitor m2) {
+        return (m1.hasAdults() && !m2.isFullOfAdults()) ||
+                (m1.hasChildren() && !m2.isFullOfChildren());
     }
 
     @Override
     public void run() {
         while (true) {
-            if (canCallPatient(ETH, EVH) && (auto || next)) {
-                ETH.get();
+            if (canCallPatient(eth, evh) && (auto || next)) {
+                eth.get();
                 next = false;
             }
-            if (canCallPatient(EVH, WTH)) EVH.get();
-            if (canCallPatient(WTH, MDH) && (auto || next)) {
-                WTH.get();
+            if (canCallPatient(evh, wth)) evh.get();
+            if (canCallPatient(wth, mdh) && (auto || next)) {
+                wth.get();
                 next = false;
             }
-            if (canCallPatient(MDH, PYH)) MDH.get();
+            if (canCallPatient(mdh, pyh)) mdh.get();
         }
     }
 }
