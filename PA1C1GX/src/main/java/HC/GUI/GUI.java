@@ -53,6 +53,10 @@ public class GUI extends JFrame {
 
     private Seats getRoomSeats(String room) {
         return switch (room) {
+            case "eth" -> (Seats) eth.getComponent(0);
+            case "wth" -> (Seats) wth.getComponent(0);
+            case "pyh" -> (Seats) pyh.getComponent(0);
+            case "out" -> (Seats) out.getComponent(0);
             case "etr1" -> (Seats) etr1.getComponent(0);
             case "etr2" -> (Seats) etr2.getComponent(0);
             case "evr1" -> (Seats) evr1.getComponent(0);
@@ -67,7 +71,6 @@ public class GUI extends JFrame {
             case "mdr4" -> (Seats) mdr4.getComponent(0);
             case "mdr2" -> (Seats) mdr2.getComponent(0);
             case "cashier" -> (Seats) cashier.getComponent(0);
-            // TODO: scrollable panel rooms
             default -> throw new IllegalArgumentException("Invalid room: " + room);
         };
     }
@@ -85,10 +88,15 @@ public class GUI extends JFrame {
         formattedTextField2.setText(String.valueOf(NoC));
         formattedTextField3.setText(String.valueOf(NoS));
 
-        for (JComponent c : new JPanel[]{etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
+        for (JComponent c : new JComponent[]{eth, wth, pyh, out, etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
                 mdw, mdr1, mdr2, mdr3, mdr4, cashier}) {
             c.setLayout(new GridLayout(1, 1));
         }
+
+        eth.add(new SeatsList(), 0);
+        wth.add(new SeatsList(), 0);
+        pyh.add(new SeatsList(), 0);
+        out.add(new SeatsList(), 0);
 
         int n = NoS / 2;
         etr1.add(new SeatsRoom(n, 0, n), 0);
