@@ -383,10 +383,6 @@ class SeatsList extends Seats {
 
     SeatsList() {
         this.patients = new ArrayList<>();
-
-        var p = new TPatient(true, null, null, null, null, null);
-        p.setETN(2);
-        this.patients.add(p);
     }
 
     @Override
