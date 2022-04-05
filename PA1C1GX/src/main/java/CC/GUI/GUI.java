@@ -3,17 +3,24 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package CC.GUI;
+import CC.Socket.ClientSocket;
+
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author guids
  */
 public class GUI extends javax.swing.JFrame {
+    
+    private ClientSocket socket;
 
     /**
      * Creates new form GUI
+     * @param socket
      */
-    public GUI() {
+    public GUI(ClientSocket socket) {
+        this.socket = socket; 
         initComponents();
     }
 
@@ -29,20 +36,20 @@ public class GUI extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
+        NoA = new javax.swing.JSpinner();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jSpinner2 = new javax.swing.JSpinner();
+        NoC = new javax.swing.JSpinner();
         jLabel4 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        NoS = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        ET = new javax.swing.JComboBox<>();
         jLabel6 = new javax.swing.JLabel();
-        jComboBox3 = new javax.swing.JComboBox<>();
+        MAT = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
-        jComboBox4 = new javax.swing.JComboBox<>();
+        PT = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
-        jComboBox5 = new javax.swing.JComboBox<>();
+        TTM = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         resumeButton = new javax.swing.JButton();
@@ -72,48 +79,48 @@ public class GUI extends javax.swing.JFrame {
         jLabel1.setText("Configuration");
         jLabel1.setToolTipText("");
 
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(10, 1, 50, 1));
+        NoA.setModel(new javax.swing.SpinnerNumberModel(10, 1, 50, 1));
 
         jLabel2.setText("Number of Adult Patients");
 
         jLabel3.setText("Number of Children Patients");
 
-        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(10, 1, 50, 1));
+        NoC.setModel(new javax.swing.SpinnerNumberModel(10, 1, 50, 1));
 
         jLabel4.setText("Number of Seats");
         jLabel4.setAutoscrolls(true);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2", "4", "6", "8", "10" }));
-        jComboBox1.setSelectedIndex(1);
-        jComboBox1.setAutoscrolls(true);
+        NoS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "2", "4", "6", "8", "10" }));
+        NoS.setSelectedIndex(1);
+        NoS.setAutoscrolls(true);
 
         jLabel5.setText("Evaluation Time (ms)");
         jLabel5.setAutoscrolls(true);
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
-        jComboBox2.setSelectedIndex(1);
-        jComboBox2.setAutoscrolls(true);
+        ET.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
+        ET.setSelectedIndex(1);
+        ET.setAutoscrolls(true);
 
         jLabel6.setText("Medical Appointment Time (ms)");
         jLabel6.setAutoscrolls(true);
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
-        jComboBox3.setSelectedIndex(1);
-        jComboBox3.setAutoscrolls(true);
+        MAT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
+        MAT.setSelectedIndex(1);
+        MAT.setAutoscrolls(true);
 
         jLabel7.setText("Payment Time (ms)");
         jLabel7.setAutoscrolls(true);
 
-        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
-        jComboBox4.setSelectedIndex(1);
-        jComboBox4.setAutoscrolls(true);
+        PT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
+        PT.setSelectedIndex(1);
+        PT.setAutoscrolls(true);
 
         jLabel8.setText("Time to Move (ms)");
         jLabel8.setAutoscrolls(true);
 
-        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
-        jComboBox5.setSelectedIndex(1);
-        jComboBox5.setAutoscrolls(true);
+        TTM.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0", "100", "250", "500", "1000" }));
+        TTM.setSelectedIndex(1);
+        TTM.setAutoscrolls(true);
 
         jLabel9.setFont(new java.awt.Font("Lato Medium", 0, 18)); // NOI18N
         jLabel9.setText("Simulation");
@@ -125,6 +132,11 @@ public class GUI extends javax.swing.JFrame {
         resumeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resume.png"))); // NOI18N
         resumeButton.setBorder(null);
         resumeButton.setEnabled(false);
+        resumeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resumeButtonActionPerformed(evt);
+            }
+        });
 
         jLabel11.setText("Suspend");
 
@@ -144,12 +156,22 @@ public class GUI extends javax.swing.JFrame {
         stopButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stop.png"))); // NOI18N
         stopButton.setBorder(null);
         stopButton.setEnabled(false);
+        stopButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stopButtonActionPerformed(evt);
+            }
+        });
 
         jLabel13.setText("End");
 
         endButton.setBackground(javax.swing.UIManager.getDefaults().getColor("window"));
         endButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/exit.png"))); // NOI18N
         endButton.setBorder(null);
+        endButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                endButtonActionPerformed(evt);
+            }
+        });
 
         jLabel14.setText("Start");
 
@@ -170,7 +192,7 @@ public class GUI extends javax.swing.JFrame {
         jLabel16.setText("Operation");
         jLabel16.setToolTipText("");
 
-        opertationModeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Auto", "Manual" }));
+        opertationModeCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "AUTO", "MANUAL" }));
         opertationModeCombo.setAutoscrolls(true);
         opertationModeCombo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -198,15 +220,15 @@ public class GUI extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(jLabel2)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(NoA, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(106, 106, 106)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(jLabel3)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(NoC, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(107, 107, 107)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(jLabel4)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(NoS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(217, 217, 217))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,19 +236,19 @@ public class GUI extends javax.swing.JFrame {
                         .addGap(108, 108, 108)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                             .addComponent(jLabel7)
-                            .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(PT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(80, 80, 80)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                             .addComponent(jLabel8)
-                            .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(TTM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(80, 80, 80)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                             .addComponent(jLabel5)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(ET, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(80, 80, 80)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                             .addComponent(jLabel6)
-                            .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(MAT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(23, 23, 23)
                         .addComponent(jLabel1)))
@@ -283,7 +305,7 @@ public class GUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
-                        .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(NoA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -312,31 +334,31 @@ public class GUI extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addGap(18, 18, 18)
-                                .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(NoC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel4)
                                 .addGap(18, 18, 18)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(NoS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(61, 61, 61)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel6)
                                 .addGap(18, 18, 18)
-                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(MAT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel8)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jComboBox5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(TTM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel5)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(ET, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel7)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(PT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(76, 76, 76)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
@@ -365,6 +387,7 @@ public class GUI extends javax.swing.JFrame {
 
     private void movePatientButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_movePatientButtonActionPerformed
         // TODO add your handling code here:
+        this.socket.sendMessage("NEXT");
     }//GEN-LAST:event_movePatientButtonActionPerformed
 
     private void opertationModeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opertationModeComboActionPerformed
@@ -375,6 +398,10 @@ public class GUI extends javax.swing.JFrame {
         else{
             movePatientButton.setEnabled(true);
         }
+        // Send updated mode if during a simulation
+        if(!startButton.isEnabled()){
+            this.socket.sendMessage(String.format("MODE:%s",  opertationModeCombo.getSelectedItem()));
+        }
     }//GEN-LAST:event_opertationModeComboActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
@@ -382,12 +409,64 @@ public class GUI extends javax.swing.JFrame {
         startButton.setEnabled(false);
         suspendButton.setEnabled(true);
         stopButton.setEnabled(true);
+        NoA.setEnabled(false);
+        NoC.setEnabled(false);
+        NoS.setEnabled(false);
+        PT.setEnabled(false);
+        ET.setEnabled(false);
+        MAT.setEnabled(false);
+        TTM.setEnabled(false);
+        
+        // Send configuration message for the CCP to start the simulation
+        this.socket.sendMessage(String.format("CONFIG:%d:%d:%s:%s:%s:%s:%s:%s",NoA.getValue(), NoC.getValue(), NoS.getSelectedItem(), 
+                PT.getSelectedItem(), ET.getSelectedItem(), MAT.getSelectedItem(), TTM.getSelectedItem(), opertationModeCombo.getSelectedItem() ));
         
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void suspendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suspendButtonActionPerformed
-        // TODO add your handling code here:
+        suspendButton.setEnabled(false);
+        resumeButton.setEnabled(true);
+        stopButton.setEnabled(true);
     }//GEN-LAST:event_suspendButtonActionPerformed
+
+    private void resumeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resumeButtonActionPerformed
+        resumeButton.setEnabled(false);
+        suspendButton.setEnabled(true);
+        stopButton.setEnabled(true);
+    }//GEN-LAST:event_resumeButtonActionPerformed
+
+    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+        // TODO add your handling code here:
+        stopButton.setEnabled(false);
+        startButton.setEnabled(true);
+        resumeButton.setEnabled(false);
+        suspendButton.setEnabled(false);
+        NoA.setValue(10);
+        NoC.setValue(10);
+        NoS.setSelectedIndex(1);
+        PT.setSelectedIndex(1);
+        ET.setSelectedIndex(1);
+        MAT.setSelectedIndex(1);
+        TTM.setSelectedIndex(1);
+        NoA.setEnabled(true);
+        NoC.setEnabled(true);
+        NoS.setEnabled(true);
+        PT.setEnabled(true);
+        ET.setEnabled(true);
+        MAT.setEnabled(true);
+        TTM.setEnabled(true);
+    }//GEN-LAST:event_stopButtonActionPerformed
+
+    private void endButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endButtonActionPerformed
+        // TODO add your handling code here:
+        int answer  = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?\n","Exit" , JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if(answer == JOptionPane.YES_OPTION){
+            this.socket.sendMessage("END");
+            this.socket.closeSocket();
+            System.exit(0);
+        }
+    }//GEN-LAST:event_endButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -419,18 +498,20 @@ public class GUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GUI().setVisible(true);
+                new GUI(null).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> ET;
+    private javax.swing.JComboBox<String> MAT;
+    private javax.swing.JSpinner NoA;
+    private javax.swing.JSpinner NoC;
+    private javax.swing.JComboBox<String> NoS;
+    private javax.swing.JComboBox<String> PT;
+    private javax.swing.JComboBox<String> TTM;
     private javax.swing.JButton endButton;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
-    private javax.swing.JComboBox<String> jComboBox4;
-    private javax.swing.JComboBox<String> jComboBox5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -450,8 +531,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
     private javax.swing.JButton movePatientButton;
     private javax.swing.JComboBox<String> opertationModeCombo;
     private javax.swing.JButton resumeButton;
