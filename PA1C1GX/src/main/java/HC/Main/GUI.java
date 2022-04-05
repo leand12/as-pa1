@@ -339,11 +339,22 @@ abstract class Seats extends JPanel {
             default -> g2.setPaint(Color.GRAY);
         }
 
+        // draw shape
         if (patient.isAdult()) {
             paintTriangle(g2, x, y);
         } else {
             paintCircle(g2, x, y);
         }
+
+        // draw ID label centered
+        var font = new Font(null, Font.PLAIN, 18);
+        var text = String.valueOf(patient.getETN());
+        var metrics = g2.getFontMetrics(font);
+        g2.setFont(font);
+        g2.setPaint(Color.BLACK);
+        g2.drawString(text,
+                x + (D - metrics.stringWidth(text)) / 2,
+                y + (D - metrics.getHeight()) / 2 + metrics.getAscent());
     }
 
     protected void paintSquare(Graphics2D g2, int x, int y) {
@@ -368,11 +379,14 @@ abstract class Seats extends JPanel {
 
 
 class SeatsList extends Seats {
-
     private final ArrayList<TPatient> patients;
 
     SeatsList() {
         this.patients = new ArrayList<>();
+
+        var p = new TPatient(true, null, null, null, null, null);
+        p.setETN(2);
+        this.patients.add(p);
     }
 
     @Override
