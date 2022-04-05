@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package HC.Monitors;
-import HC.Threads.TPatient;
+import HC.Entities.TPatient;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,8 +23,11 @@ public class METH {
     private Condition[] carrayAdult;
     private Condition[] carrayChild;
         
-    private int adultIdx = 0;
-    private int childIdx = 0;
+    private int putAdultIdx = 0;
+    private int putChildIdx = 0;
+    
+    private int getAdultIdx = 0;
+    private int getChildIdx = 0;
     
     private int adultCount = 0;
     private int childCount = 0;
@@ -35,6 +38,12 @@ public class METH {
     
     public METH(int NoS){
         this.NoS = NoS/2;
+        adultFIFO = new TPatient[this.NoS];
+        childFIFO = new TPatient[this.NoS];
+        
+        carrayAdult = new Condition[this.NoS];
+        carrayChild = new Condition[this.NoS];
+        
         this.rl = new ReentrantLock();
         this.cAdult = rl.newCondition();
         this.cChild = rl.newCondition();
@@ -42,7 +51,6 @@ public class METH {
     
     // Used by a patient in order to enter the Hall
     public int put(TPatient patient){
-        
         int pETN = ETN;
         try {
             rl.lock();
@@ -51,23 +59,24 @@ public class METH {
                 while(adultCount == NoS){
                     cAdult.await();
                 }
-                adultFIFO[adultIdx] = patient;
-                carrayAdult[adultIdx] = rl.newCondition();
-                carrayAdult[adultIdx].await();
-                adultIdx = (adultIdx+1) % NoS;
-                ETN++;
                 adultCount++;
+                adultFIFO[putAdultIdx] = patient;
+                carrayAdult[putAdultIdx] = rl.newCondition();
+                carrayAdult[putAdultIdx].await();
+                putAdultIdx = (putAdultIdx+1) % NoS;
+                ETN++;
             }
             else{
                 while(childCount == NoS){
                     cChild.await();
                 }
-                childFIFO[childIdx] = patient;
-                carrayChild[childIdx] = rl.newCondition();
-                carrayChild[childIdx].await();
-                childIdx = (childIdx+1) % NoS;
-                ETN++;
                 childCount++;
+                childFIFO[putChildIdx] = patient;
+                carrayChild[putChildIdx] = rl.newCondition();
+                carrayChild[putChildIdx].await();
+                putChildIdx = (putChildIdx+1) % NoS;
+                ETN++;
+                
             }
             return pETN;
         } catch ( InterruptedException ex ) {return -1;}
@@ -84,29 +93,32 @@ public class METH {
         if(adultCount != 0 && childCount != 0){
             
             // remove adult
-            if(adultFIFO[(adultIdx+NoS-1)%NoS].getETN() < childFIFO[(childIdx+NoS-1)%NoS].getETN()){
+            if(adultFIFO[(getAdultIdx+NoS-1)%NoS].getETN() < childFIFO[(getAdultIdx+NoS-1)%NoS].getETN()){
                 adultCount--;
-                carrayAdult[(adultIdx+NoS-1)%NoS].signal();
+                carrayAdult[getAdultIdx].signal();
+                getAdultIdx = (getAdultIdx+1) % NoS;
                 cAdult.signal();
             }
             else{
                 childCount--;
-                carrayChild[(childIdx+NoS-1)%NoS].signal();
+                carrayChild[getChildIdx].signal();
+                getChildIdx = (getChildIdx+1) % NoS;
                 cChild.signal();          
             }
         }
         else if(adultCount != 0){
             adultCount--;
-            carrayAdult[(adultIdx+NoS-1)%NoS].signal();
+            carrayAdult[getAdultIdx].signal();
+            getAdultIdx = (getAdultIdx+1) % NoS;
             cAdult.signal();
         }
         else if(childCount !=0){
             childCount--;
-            carrayChild[(childIdx+NoS-1)%NoS].signal();
+            carrayChild[getChildIdx].signal();
+            getChildIdx = (getChildIdx+1) % NoS;
             cChild.signal();
         }
     }
 }
 
 
-// TODO: Waiting times

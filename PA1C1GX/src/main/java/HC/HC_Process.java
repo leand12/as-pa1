@@ -4,25 +4,27 @@
  */
 package HC;
 
-import HC.GUI.GUI;
-import HC.SocketServer.TSocketServer;
+import HC.Main.GUI;
+import HC.Comunication.TSocketHandler;
+import HC.Entities.TPatient;
+
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 
 /**
  *
  * @author guids
  */
-public class Main {
+public class HC_Process {
     
     final static int portNumber = 5000;
     
-    public static void main(String[ ] args) {
+    public static void main(String[] args) {
         
-        JFrame frame = new GUI();
-        frame.setVisible(true);
-        
+        GUI frame = new GUI(2, 2, 10);
+
         System.out.println("HC begining:");
         
         try{ 
@@ -31,7 +33,7 @@ public class Main {
             // wait for clients to join
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                TSocketServer socket = new TSocketServer(clientSocket);
+                TSocketHandler socket = new TSocketHandler(clientSocket);
                 socket.start();
             }
             
@@ -41,6 +43,5 @@ public class Main {
             System.err.println("Socket error");
         }
     }
-    
     
 }
