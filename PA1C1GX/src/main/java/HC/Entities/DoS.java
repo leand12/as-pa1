@@ -1,4 +1,4 @@
-package HC.Threads;
+package HC.Entities;
 
 public enum DoS {
     RED,

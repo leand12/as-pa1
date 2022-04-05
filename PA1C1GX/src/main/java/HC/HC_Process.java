@@ -4,9 +4,9 @@
  */
 package HC;
 
-import HC.GUI.GUI;
-import HC.SocketServer.TSocketServer;
-import HC.Threads.TPatient;
+import HC.Main.GUI;
+import HC.Comunication.TSocketHandler;
+import HC.Entities.TPatient;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,7 +17,7 @@ import javax.swing.JFrame;
  *
  * @author guids
  */
-public class Main {
+public class HC_Process {
     
     final static int portNumber = 5000;
     
@@ -33,7 +33,7 @@ public class Main {
             // wait for clients to join
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                TSocketServer socket = new TSocketServer(clientSocket);
+                TSocketHandler socket = new TSocketHandler(clientSocket);
                 socket.start();
             }
             

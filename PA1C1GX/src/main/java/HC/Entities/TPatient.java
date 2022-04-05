@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package HC.Threads;
+package HC.Entities;
 
 import HC.Monitors.METH;
 
@@ -37,7 +37,7 @@ public class TPatient extends Thread {
     @Override
     public void run(){
 
-//        int id = this.ETH.put(this);
+        int id = this.ETH.put(this);
     }
     
 }

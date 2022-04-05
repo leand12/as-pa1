@@ -1,6 +1,6 @@
-package HC.GUI;
+package HC.Main;
 
-import HC.Threads.TPatient;
+import HC.Entities.TPatient;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -88,16 +88,16 @@ public class GUI extends JFrame {
         formattedTextField2.setText(String.valueOf(NoC));
         formattedTextField3.setText(String.valueOf(NoS));
 
-        for (JComponent c : new JComponent[]{eth, wth, pyh, out, etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
+        for (JComponent c : new JComponent[]{ etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
                 mdw, mdr1, mdr2, mdr3, mdr4, cashier}) {
             c.setLayout(new GridLayout(1, 1));
         }
-
+        /*
         eth.add(new SeatsList(), 0);
         wth.add(new SeatsList(), 0);
         pyh.add(new SeatsList(), 0);
         out.add(new SeatsList(), 0);
-
+*/
         int n = NoS / 2;
         etr1.add(new SeatsRoom(n, 0, n), 0);
         etr2.add(new SeatsRoom(n, n, 0), 0);

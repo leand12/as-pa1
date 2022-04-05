@@ -1,4 +1,4 @@
-package HC.Threads;
+package HC.Entities;
 
 public class TCallCenter extends Thread {
 }
