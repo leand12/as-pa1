@@ -1,6 +1,5 @@
 package HC.GUI;
 
-import HC.Threads.DoS;
 import HC.Threads.TPatient;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -12,13 +11,11 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 
 public class GUI extends JFrame {
-
     private JPanel panel1;
     private JFormattedTextField formattedTextField1;
     private JFormattedTextField formattedTextField2;
@@ -41,87 +38,78 @@ public class GUI extends JFrame {
     private JScrollPane pyh;
     private JPanel cashier;
     private JScrollPane out;
-    private SeatsGraphics test;
+
+    public GUI(int NoA, int NoC, int NoS) {
+        initComponents(NoA, NoC, NoS);
+    }
 
     public GUI() {
-        initComponents();
-        displaySimulation();
+        initComponents(4, 4, 10);
     }
 
     public static void main(String[] args) {
         EventQueue.invokeLater(GUI::new);
     }
 
-    public void displaySimulation() {
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        String message = "CONFIG";
-        System.out.println("ok");
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-        test.repaint();
-//        while (true) {
-//            switch (message) {
-//                case "CONFIG":
-//                    //TODO: show config and all defined patients on entrance
-//                    break;
-//                case "MOVE":
-//                    //TODO: tp object to another room
-//                    break;
-//                case "EVAL":
-//                    //TODO: change object color
-//                    break;
-//            }
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+    private Seats getRoomSeats(String room) {
+        return switch (room) {
+            case "etr1" -> (Seats) etr1.getComponent(0);
+            case "etr2" -> (Seats) etr2.getComponent(0);
+            case "evr1" -> (Seats) evr1.getComponent(0);
+            case "evr2" -> (Seats) evr2.getComponent(0);
+            case "evr3" -> (Seats) evr3.getComponent(0);
+            case "evr4" -> (Seats) evr4.getComponent(0);
+            case "wtr1" -> (Seats) wtr1.getComponent(0);
+            case "wtr2" -> (Seats) wtr2.getComponent(0);
+            case "mdw" -> (Seats) mdw.getComponent(0);
+            case "mdr1" -> (Seats) mdr1.getComponent(0);
+            case "mdr3" -> (Seats) mdr3.getComponent(0);
+            case "mdr4" -> (Seats) mdr4.getComponent(0);
+            case "mdr2" -> (Seats) mdr2.getComponent(0);
+            case "cashier" -> (Seats) cashier.getComponent(0);
+            // TODO: scrollable panel rooms
+            default -> throw new IllegalArgumentException("Invalid room: " + room);
+        };
     }
 
-    public void initComponents() {
-        formattedTextField1.setText("XX");
-        formattedTextField2.setText("YY");
-        formattedTextField3.setText("ZZ");
+    public void addPatient(String room, TPatient patient) {
+        getRoomSeats(room).addPatient(patient);
+    }
+
+    public void removePatient(String room, TPatient patient) {
+        getRoomSeats(room).removePatient(patient);
+    }
+
+    private void initComponents(int NoA, int NoC, int NoS) {
+        formattedTextField1.setText(String.valueOf(NoA));
+        formattedTextField2.setText(String.valueOf(NoC));
+        formattedTextField3.setText(String.valueOf(NoS));
 
         for (JComponent c : new JPanel[]{etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
                 mdw, mdr1, mdr2, mdr3, mdr4, cashier}) {
             c.setLayout(new GridLayout(1, 1));
         }
 
-        test = new SeatsGraphics(5, 0, 5);
+        int n = NoS / 2;
+        etr1.add(new SeatsRoom(n, 0, n), 0);
+        etr2.add(new SeatsRoom(n, n, 0), 0);
 
-        etr1.add(test);
+        evr1.add(new SeatsRoom(1, 0, 0), 0);
+        evr2.add(new SeatsRoom(1, 0, 0), 0);
+        evr3.add(new SeatsRoom(1, 0, 0), 0);
+        evr4.add(new SeatsRoom(1, 0, 0), 0);
 
-        etr2.add(new SeatsGraphics(5, 5, 0));
+        wtr1.add(new SeatsRoom(n, 0, n), 0);
+        wtr2.add(new SeatsRoom(n, n, 0), 0);
 
-        evr1.add(new SeatsGraphics(1, 0, 0));
-        evr2.add(new SeatsGraphics(1, 0, 0));
-        evr3.add(new SeatsGraphics(1, 0, 0));
-        evr4.add(new SeatsGraphics(1, 0, 0));
+        mdw.add(new SeatsRoom(2, 1, 1), 0);
 
-        wtr1.add(new SeatsGraphics(5, 0, 5));
-        wtr2.add(new SeatsGraphics(5, 5, 0));
+        mdr1.add(new SeatsRoom(1, 0, 1), 0);
+        mdr2.add(new SeatsRoom(1, 0, 1), 0);
+        mdr3.add(new SeatsRoom(1, 1, 0), 0);
+        mdr4.add(new SeatsRoom(1, 1, 0), 0);
 
-        mdw.add(new SeatsGraphics(2, 1, 1));
-
-        mdr1.add(new SeatsGraphics(1, 0, 1));
-        mdr2.add(new SeatsGraphics(1, 0, 1));
-        mdr3.add(new SeatsGraphics(1, 1, 0));
-        mdr4.add(new SeatsGraphics(1, 1, 0));
-
-        cashier.add(new SeatsGraphics(1, 0, 0));
+        cashier.add(new SeatsRoom(1, 0, 0), 0);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("HC GUI");
@@ -130,7 +118,6 @@ public class GUI extends JFrame {
         pack();
         setLocationByPlatform(true);
         setVisible(true);
-
     }
 
     {
@@ -315,45 +302,139 @@ public class GUI extends JFrame {
 
 }
 
-class SeatsGraphics extends JPanel {
+
+abstract class Seats extends JPanel {
     private static final int P = 5;
     private static final int R = 30;
     private static final int D = 2 * R;
-    private int count = 0;
-    private int id;
-    private static int c = 0;
 
+    abstract void addPatient(TPatient patient);
+    abstract void removePatient(TPatient patient);
+
+    protected void paintPatient(Graphics2D g2, int x, int y, TPatient patient) {
+        switch (patient.getDos()) {
+            case RED -> g2.setPaint(Color.RED);
+            case YELLOW -> g2.setPaint(Color.YELLOW);
+            case BLUE -> g2.setPaint(Color.BLUE);
+            default -> g2.setPaint(Color.GRAY);
+        }
+
+        if (patient.isAdult()) {
+            paintTriangle(g2, x, y);
+        } else {
+            paintCircle(g2, x, y);
+        }
+    }
+
+    protected void paintSquare(Graphics2D g2, int x, int y) {
+        Rectangle2D shape = new Rectangle2D.Double(x * D + P, y * D + P, D - P, D - P);
+        g2.fill(shape);
+    }
+
+    protected void paintTriangle(Graphics2D g2, int x, int y) {
+        Path2D path = new Path2D.Double();
+        path.moveTo(x * D + P, y * D + D - P);
+        path.lineTo(x * D + D - P, y * D + D - P);
+        path.lineTo(x * D + D / 2.0, y * D + P);
+        path.closePath();
+        g2.fill(path);
+    }
+
+    protected void paintCircle(Graphics2D g2, int x, int y) {
+        Ellipse2D shape = new Ellipse2D.Double(x * D + P, y * D + P, D - P, D - P);
+        g2.fill(shape);
+    }
+}
+
+
+class SeatsList extends Seats {
+
+    private final ArrayList<TPatient> patients;
+
+    SeatsList() {
+        this.patients = new ArrayList<>();
+    }
+
+    @Override
+    public void addPatient(TPatient patient) {
+        if (patients.contains(patient))
+            throw new IllegalArgumentException("Patient already inside the room");
+
+        patients.add(patient);
+    }
+
+    @Override
+    public void removePatient(TPatient patient) {
+        if (!patients.contains(patient))
+            throw new IllegalArgumentException("Patient not found");
+
+        patients.remove(patient);
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+
+        // paint patients
+        for (var y = 0; y <= patients.size() / 3; y++) {
+            for (var x = 0; x < 3; x++) {
+                int seat = 3 * y + x;
+                if (seat >= patients.size()) break;
+
+                TPatient patient = patients.get(seat);
+                paintPatient(g2, x, y, patient);
+            }
+        }
+    }
+}
+
+class SeatsRoom extends Seats {
     private final int numberOfSeats;
     private final int numberOfAdultSeats;
     private final int numberOfChildSeats;
-    private TPatient[] patients;
+    private final TPatient[] patients;
 
-    private Graphics2D g2;
-
-    SeatsGraphics(int numberOfSeats, int numberOfAdultSeats, int numberOfChildSeats) {
-        this.id = c++;
+    SeatsRoom(int numberOfSeats, int numberOfAdultSeats, int numberOfChildSeats) {
         this.numberOfSeats = numberOfSeats;
         this.numberOfAdultSeats = numberOfAdultSeats;
         this.numberOfChildSeats = numberOfChildSeats;
         this.patients = new TPatient[numberOfSeats];
     }
 
+    @Override
     public void addPatient(TPatient patient) {
-        assert !Arrays.asList(patients).contains(patient);
+        if (Arrays.asList(patients).contains(patient))
+            throw new IllegalArgumentException("Patient already inside the room");
 
-        for (int i = 0; i < numberOfSeats; i++) {
+        for (var i = 0; i < numberOfSeats; i++) {
             if (patients[i] == null) {
-                // found empty seat, assign patient
-                patients[i] = patient;
-                repaint();
-                return;
+                // found empty seat for new patient
+
+                // check seat is for right patient (adult or child)
+                var adequateSeat = false;
+                if (i < numberOfChildSeats) {
+                    if (!patient.isAdult()) adequateSeat = true;
+                } else if (i < numberOfAdultSeats + numberOfChildSeats) {
+                    if (patient.isAdult()) adequateSeat = true;
+                } else {
+                    adequateSeat = true;
+                }
+
+                if (adequateSeat) {
+                    // add patient
+                    patients[i] = patient;
+                    repaint();
+                    return;
+                }
             }
         }
-        assert false;
+        throw new IllegalArgumentException("No seat available");
     }
 
+    @Override
     public void removePatient(TPatient patient) {
-        for (int i = 0; i < numberOfSeats; i++) {
+        for (var i = 0; i < numberOfSeats; i++) {
             if (patients[i] == patient) {
                 // remove patient from seat
                 patients[i] = null;
@@ -361,18 +442,18 @@ class SeatsGraphics extends JPanel {
                 return;
             }
         }
-        assert false;
+        throw new IllegalArgumentException("Patient not found");
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        this.g2 = g2;
-        g2.setPaint(Color.LIGHT_GRAY);
 
-        for (int y = 0; y <= numberOfSeats / 3; y++) {
-            for (int x = 0; x < 3; x++) {
+        // paint seats
+        g2.setPaint(Color.LIGHT_GRAY);
+        for (var y = 0; y <= numberOfSeats / 3; y++) {
+            for (var x = 0; x < 3; x++) {
                 int seat = 3 * y + x;
                 if (seat >= numberOfSeats) break;
 
@@ -386,46 +467,17 @@ class SeatsGraphics extends JPanel {
             }
         }
 
-        for (int y = 0; y <= numberOfSeats / 3; y++) {
-            for (int x = 0; x < 3; x++) {
+        // paint patients
+        for (var y = 0; y <= numberOfSeats / 3; y++) {
+            for (var x = 0; x < 3; x++) {
                 int seat = 3 * y + x;
                 if (seat >= numberOfSeats) break;
 
                 TPatient patient = patients[seat];
                 if (patient == null) continue;
 
-                switch (patient.getDos()) {
-                    case RED -> g2.setPaint(Color.RED);
-                    case YELLOW -> g2.setPaint(Color.YELLOW);
-                    case BLUE -> g2.setPaint(Color.BLUE);
-                    default -> g2.setPaint(Color.LIGHT_GRAY);
-                }
-
-                if (patient.isAdult()) {
-                    paintTriangle(g2, x, y);
-                } else {
-                    paintCircle(g2, x, y);
-                }
+                paintPatient(g2, x, y, patient);
             }
         }
-    }
-
-    private void paintSquare(Graphics2D g2, int x, int y) {
-        Rectangle2D shape = new Rectangle2D.Double(x * D + P, y * D + P, D - P, D - P);
-        g2.fill(shape);
-    }
-
-    private void paintTriangle(Graphics2D g2, int x, int y) {
-        Path2D path = new Path2D.Double();
-        path.moveTo(x * D + P, y * D + D - P);
-        path.lineTo(x * D + D - P, y * D + D - P);
-        path.lineTo(x * D + D / 2.0, y * D + P);
-        path.closePath();
-        g2.fill(path);
-    }
-
-    private void paintCircle(Graphics2D g2, int x, int y) {
-        Ellipse2D shape = new Ellipse2D.Double(x * D + P, y * D + P, D - P, D - P);
-        g2.fill(shape);
     }
 }

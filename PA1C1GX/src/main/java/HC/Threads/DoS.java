@@ -1,2 +1,8 @@
-package HC.Threads;public class DoS {
+package HC.Threads;
+
+public enum DoS {
+    RED,
+    YELLOW,
+    BLUE,
+    NONE
 }

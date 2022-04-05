@@ -4,40 +4,38 @@
  */
 package HC.SocketServer;
 
-import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.net.Socket;
 
 /**
- *
  * @author guids
  */
-public class TSocketServer extends Thread{
-    
-    private Socket socket;
-    
-    public TSocketServer(Socket socket){
+public class TSocketServer extends Thread {
+
+    private final Socket socket;
+
+    public TSocketServer(Socket socket) {
         this.socket = socket;
         System.out.println("Aqui");
     }
-    
+
     @Override
-    public void run(){
-        
+    public void run() {
+
         try {
             System.out.println("Ali");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            
+
             String inputLine;
-            
+
             while (true) {
-                if((inputLine = in.readLine()) != null){
+                if ((inputLine = in.readLine()) != null) {
                     System.out.println(inputLine);
                     String[] clientMessage = inputLine.split(":");
-                    
-                    switch(clientMessage[0]){
+
+                    switch (clientMessage[0]) {
                         case "CONFIG":
                             //TODO
                             break;
@@ -52,11 +50,10 @@ public class TSocketServer extends Thread{
                             System.exit(0);
                             break;
                     }
-                } 
-            
-            } 
-        }
-        catch (IOException e) {
+                }
+
+            }
+        } catch (IOException e) {
             System.err.println("Socket error");
         }
     }
