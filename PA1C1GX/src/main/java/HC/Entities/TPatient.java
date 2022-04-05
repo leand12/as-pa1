@@ -33,11 +33,13 @@ public class TPatient extends Thread {
     public int getETN(){
         return ETN;
     }
+
+    public void setETN(int ETN) { this.ETN = ETN; }
     
     @Override
     public void run(){
 
-        int id = this.ETH.put(this);
+        this.ETH.put(this);
     }
     
 }

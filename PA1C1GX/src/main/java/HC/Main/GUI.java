@@ -88,7 +88,7 @@ public class GUI extends JFrame {
         formattedTextField2.setText(String.valueOf(NoC));
         formattedTextField3.setText(String.valueOf(NoS));
 
-        for (JComponent c : new JComponent[]{ etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
+        for (JComponent c : new JComponent[]{etr1, etr2, evr1, evr2, evr3, evr4, wtr1, wtr2,
                 mdw, mdr1, mdr2, mdr3, mdr4, cashier}) {
             c.setLayout(new GridLayout(1, 1));
         }
