@@ -7,33 +7,30 @@ package HC.Logging;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- *
  * @author guids
  */
 public class Logging {
-    
-    private BufferedWriter logfile; 
-    private ReentrantLock rl;
-    private Condition cWrite;
-    
+
+    private final BufferedWriter logfile;
+    private final ReentrantLock rl;
+    private final Condition cWrite;
+
     private boolean isWriting = false;
-    
-    public Logging() throws IOException{
-        this.logfile = new BufferedWriter(new FileWriter("src/main/java/HC/Logging/log.txt")); 
+
+    public Logging() throws IOException {
+        this.logfile = new BufferedWriter(new FileWriter("src/main/java/HC/Logging/log.txt"));
         this.rl = new ReentrantLock();
         this.cWrite = rl.newCondition();
-
     }
-    
-    public void log(String message) throws IOException{
+
+    public void log(String message) throws IOException {
         try {
             rl.lock();
-            while(this.isWriting){
+            while (this.isWriting) {
                 cWrite.await();
             }
             this.isWriting = true;
@@ -43,14 +40,10 @@ public class Logging {
             this.logfile.flush();
             this.cWrite.signal();
             this.isWriting = false;
-            
-              
-        } catch ( InterruptedException ex ) {return;}
-        finally {
+        } catch (InterruptedException ex) {
+            return;
+        } finally {
             rl.unlock();
-            
         }
-        
     }
-    
 }
