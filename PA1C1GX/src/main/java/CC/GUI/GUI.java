@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package CC.GUI;
-import CC.Comunication.ClientSocket;
+import CC.Communication.ClientSocket;
 
 import javax.swing.JOptionPane;
 
