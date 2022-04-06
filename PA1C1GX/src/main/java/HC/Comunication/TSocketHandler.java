@@ -4,6 +4,7 @@
  */
 package HC.Comunication;
 
+import HC.Logging.Logging;
 import HC.Monitors.METH;
 import HC.Entities.TPatient;
 import java.io.BufferedReader;
@@ -32,15 +33,23 @@ public class TSocketHandler extends Thread {
             
             int NoA, NoC, NoS, PT, ET, MAT, TTM;
             String mode;
+            
+            // Initializing log
+            Logging log = new Logging();
+            log.log("STT | ETH ET1 ET2 | EVR1 EVR2 EVR3 EVR4 | WTH WTR1 WTR2 | MDH MDR1 MDR2 MDR3 MDR4 | PYH");
+            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "INI", " ", " ", " ", " ", " "));
 
             while (true) {
                 if ((inputLine = in.readLine()) != null) {
-                    System.out.println(inputLine);
                     String[] clientMessage = inputLine.split(":");
 
                     switch (clientMessage[0]) {
                         //NoA:NoC:NoS:PT:ET:MAT:TTM:Mode
                         case "CONFIG":
+                            
+                            //INIT
+                            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "RUN", " ", " ", " ", " ", " "));
+                            
                             NoA = Integer.parseInt(clientMessage[1]);
                             NoC = Integer.parseInt(clientMessage[2]);
                             NoS = Integer.parseInt(clientMessage[3]);
@@ -50,8 +59,11 @@ public class TSocketHandler extends Thread {
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
                             
+                            
+                            
+                            
                             // Create Monitor
-                            METH meth = new METH(NoS);
+                            METH meth = new METH(NoS, TTM, log);
                             
                             // Create Adult Patients
                             for(int i =0; i<NoA; i++){
