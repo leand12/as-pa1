@@ -5,7 +5,7 @@
 package CC;
 
 import CC.GUI.GUI;
-import CC.Comunication.ClientSocket;
+import CC.Communication.ClientSocket;
 
 
 /**

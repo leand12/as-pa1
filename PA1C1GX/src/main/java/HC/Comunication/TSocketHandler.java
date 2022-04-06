@@ -6,6 +6,7 @@ package HC.Comunication;
 
 import HC.Entities.TCallCenter;
 import HC.Entities.TPatient;
+import HC.Logging.Logging;
 import HC.Monitors.*;
 
 import java.io.BufferedReader;
@@ -36,14 +37,22 @@ public class TSocketHandler extends Thread {
             int NoA, NoC, NoS, PT, ET, MAT, TTM;
             String mode;
 
+            // Initializing log
+            Logging log = new Logging();
+            log.log("STT | ETH ET1 ET2 | EVR1 EVR2 EVR3 EVR4 | WTH WTR1 WTR2 | MDH MDR1 MDR2 MDR3 MDR4 | PYH");
+            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "INI", " ", " ", " ", " ", " "));
+
             while (true) {
                 if ((inputLine = in.readLine()) != null) {
-                    System.out.println(inputLine);
                     String[] clientMessage = inputLine.split(":");
 
                     switch (clientMessage[0]) {
                         //NoA:NoC:NoS:PT:ET:MAT:TTM:Mode
                         case "CONFIG":
+
+                            //INIT
+                            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "RUN", " ", " ", " ", " ", " "));
+
                             NoA = Integer.parseInt(clientMessage[1]);
                             NoC = Integer.parseInt(clientMessage[2]);
                             NoS = Integer.parseInt(clientMessage[3]);
@@ -54,7 +63,7 @@ public class TSocketHandler extends Thread {
                             mode = clientMessage[8];
 
                             // Create Monitors
-                            var eth = new METH(NoS);
+                            var eth = new METH(NoS, TTM, log);
                             var evh = new MEVH();
                             var wth = new MWTH();
                             var mdh = new MMDH();

@@ -5,7 +5,9 @@
 package HC.Monitors;
 
 import HC.Entities.TPatient;
+import HC.Logging.Logging;
 
+import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,8 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Entrance Hall Monitor
  */
 public class METH implements IMonitor {
-
-    private final int NoS;
     private final TPatient[] adultFIFO;
     private final TPatient[] childFIFO;
     private final Condition[] carrayAdult;
@@ -23,7 +23,11 @@ public class METH implements IMonitor {
     private final ReentrantLock rl;
     private final Condition cChild;
     private final Condition cAdult;
+    private final Logging log;
+    private final int NoS;
+
     private int ETN = 0; // Patient Number
+    private int ttm = 0;
     private int putAdultIdx = 0;
     private int putChildIdx = 0;
     private int getAdultIdx = 0;
@@ -31,17 +35,20 @@ public class METH implements IMonitor {
     private int adultCount = 0;
     private int childCount = 0;
 
-    public METH(int NoS) {
+    public METH(int NoS, int ttm, Logging log) {
         this.NoS = NoS / 2;
+        this.ttm = ttm;
+        this.log = log;
+
         adultFIFO = new TPatient[this.NoS];
         childFIFO = new TPatient[this.NoS];
 
         carrayAdult = new Condition[this.NoS];
         carrayChild = new Condition[this.NoS];
 
-        this.rl = new ReentrantLock();
-        this.cAdult = rl.newCondition();
-        this.cChild = rl.newCondition();
+        rl = new ReentrantLock();
+        cAdult = rl.newCondition();
+        cChild = rl.newCondition();
     }
 
     @Override
@@ -65,39 +72,59 @@ public class METH implements IMonitor {
     }
 
     // Used by a patient in order to enter the Hall
-    @Override
     public void put(TPatient patient) {
-        int pETN = ETN;
+        int pETN;
         try {
             rl.lock();
 
             if (patient.isAdult()) {
-                while (isFullOfAdults()) {
+                while (adultCount == NoS) {
                     cAdult.await();
                 }
                 adultCount++;
-                adultFIFO[putAdultIdx] = patient;
-                carrayAdult[putAdultIdx] = rl.newCondition();
-                carrayAdult[putAdultIdx].await();
-                putAdultIdx = (putAdultIdx + 1) % NoS;
+                pETN = ETN;
                 ETN++;
+
+                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "A", pETN, " ", " ", " ", " ", " "));
+
+                // Move from ETH to ETR
+                Thread.sleep((int) Math.floor(Math.random() * ttm));
+
+                log.log(String.format("%-4s| %3s %1s%2d %4s|%-21s|%-15s|%-25s|%-4s", " ", " ", "A", pETN, " ", " ", " ", " ", " "));
+
+                int tempIdx = putAdultIdx;
+                putAdultIdx = (putAdultIdx + 1) % NoS;
+                adultFIFO[tempIdx] = patient;
+                carrayAdult[tempIdx] = rl.newCondition();
+                carrayAdult[tempIdx].await();
+
             } else {
-                while (isFullOfChildren()) {
+                while (childCount == NoS) {
                     cChild.await();
                 }
                 childCount++;
-                childFIFO[putChildIdx] = patient;
-                carrayChild[putChildIdx] = rl.newCondition();
-                carrayChild[putChildIdx].await();
-                putChildIdx = (putChildIdx + 1) % NoS;
+                pETN = ETN;
                 ETN++;
+                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "C", pETN, " ", " ", " ", " ", " "));
 
+                // Move from ETH to ETR
+                Thread.sleep((int) Math.floor(Math.random() * ttm));
+
+                log.log(String.format("%-4s| %8s%1s%2d |%-21s|%-15s|%-25s|%-4s", " ", " ", "C", pETN, " ", " ", " ", " ", " "));
+
+                int tempIdx = putChildIdx;
+                putChildIdx = (putChildIdx + 1) % NoS;
+                childFIFO[tempIdx] = patient;
+                carrayChild[tempIdx] = rl.newCondition();
+                carrayChild[tempIdx].await();
             }
             // assign ETN to patient
             patient.setETN(pETN);
 
-        } catch (InterruptedException ignored) {
-            System.err.println("Monitor::put error");
+        } catch (InterruptedException err) {
+            System.err.println(err);
+        } catch (IOException err) {
+            System.err.println(err);
         } finally {
             rl.unlock();
         }
