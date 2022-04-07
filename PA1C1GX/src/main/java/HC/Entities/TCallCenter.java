@@ -29,8 +29,9 @@ public class TCallCenter extends Thread {
     }
 
     private boolean canCallPatient(IMonitor m1, IMonitor m2) {
-        return (m1.hasAdults() && !m2.isFullOfAdults()) ||
-                (m1.hasChildren() && !m2.isFullOfChildren());
+        /*return (m1.hasAdults() && !m2.isFullOfAdults()) ||
+                (m1.hasChildren() && !m2.isFullOfChildren());*/
+        return true;
     }
 
     @Override
@@ -40,12 +41,15 @@ public class TCallCenter extends Thread {
                 eth.get();
                 next = false;
             }
+
+            /*
             if (canCallPatient(evh, wth)) evh.get();
             if (canCallPatient(wth, mdh) && (auto || next)) {
                 wth.get();
                 next = false;
             }
             if (canCallPatient(mdh, pyh)) mdh.get();
+            */
         }
     }
 }

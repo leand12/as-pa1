@@ -47,7 +47,7 @@ public class TPatient extends Thread {
     @Override
     public void run(){
         this.eth.put(this);
-        // TODO
+        this.evh.put(this);
     }
     
 }

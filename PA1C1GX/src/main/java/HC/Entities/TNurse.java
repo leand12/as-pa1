@@ -4,6 +4,8 @@
  */
 package HC.Entities;
 import HC.Monitors.MEVH;
+import java.util.Random;
+
 
 /**
  *
@@ -12,14 +14,28 @@ import HC.Monitors.MEVH;
 public class TNurse extends Thread{
     
     private MEVH mevh;
+    private int evt;
     
-    public TNurse(MEVH mevh){
+    public TNurse(MEVH mevh, int evt){
         this.mevh = mevh;
+        this.evt = evt;
+    }
+    
+    public void assignDos(TPatient patient) throws InterruptedException{
+        DoS dos = DoS.NONE;
+        while(dos==DoS.NONE){
+            dos = DoS.values()[new Random().nextInt(DoS.values().length)];
+        } 
+        
+        // evaluation time
+        Thread.sleep((int) Math.floor(Math.random() * evt));
+        patient.setDos(dos);
     }
     
     @Override
     public void run(){
-        // TODO
+        mevh.assignNurse(this);
+        while(true){}
     }
     
 }
