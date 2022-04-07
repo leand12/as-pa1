@@ -23,8 +23,9 @@ public class MEVH implements IMonitor {
     
     private int patientCount=0;
     private boolean nurseAssign = false;
+    private int ttm = 0;
     
-    public MEVH(Logging log){
+    public MEVH(Logging log, int ttm){
         this.rl = new ReentrantLock();
         this.rl1 = new ReentrantLock();
         this.cRoom = this.rl.newCondition();
@@ -32,6 +33,7 @@ public class MEVH implements IMonitor {
         this.nurses = new TNurse[4];
         this.roomOcupied = new boolean[4];
         this.log = log;
+        this.ttm = ttm;
     }
     
     public void assignNurse(TNurse nurse){
@@ -79,8 +81,6 @@ public class MEVH implements IMonitor {
     @Override
     public void put(TPatient patient) {
         try {
-            rl.lock();
-
             for(int i=0; i<4; i++){
                 // patient enters room
                 if(!this.roomOcupied[i]){
@@ -106,6 +106,10 @@ public class MEVH implements IMonitor {
                         log.log(String.format("%-4s|%13s|%s%1s%2d%s%s|%-15s|%-25s|%-4s", " ", " ",str, "C", patient.getETN(), patient.getDos().toString().charAt(0),str1," ", " ", " ", " ", " "));
                     }
                     
+                    // patient moves to WTH
+                    Thread.sleep((int) Math.floor(Math.random() * ttm));
+                    this.roomOcupied[i] = false;
+                    patientCount--;
                     break;
                 }
                 
@@ -115,7 +119,7 @@ public class MEVH implements IMonitor {
             System.err.println(e);
         }
         finally{
-            rl.unlock();
+           
         }
     }
 

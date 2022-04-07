@@ -65,7 +65,7 @@ public class TSocketHandler extends Thread {
 
                             // Create Monitors
                             var eth = new METH(NoS, TTM, log);
-                            var evh = new MEVH(log);
+                            var evh = new MEVH(log, TTM);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
