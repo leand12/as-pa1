@@ -83,6 +83,10 @@ public class GUI extends JFrame {
         getRoomSeats(room).removePatient(patient);
     }
 
+    public void updateRoom(String room) {
+        getRoomSeats(room).repaint();
+    }
+
     private void initComponents(int NoA, int NoC, int NoS) {
         formattedTextField1.setText(String.valueOf(NoA));
         formattedTextField2.setText(String.valueOf(NoC));
@@ -123,7 +127,7 @@ public class GUI extends JFrame {
         setTitle("HC GUI");
 
         add(panel1);
-        pack();
+        setSize(1400, 800);
         setLocationByPlatform(true);
         setVisible(true);
     }

@@ -19,8 +19,6 @@ public class HC_Process {
     final static int portNumber = 5000;
     
     public static void main(String[] args) {
-        
-        GUI frame = new GUI(2, 2, 10);
 
         System.out.println("HC begining:");
         

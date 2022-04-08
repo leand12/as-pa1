@@ -8,6 +8,7 @@ import HC.Entities.TCallCenter;
 import HC.Entities.TPatient;
 import HC.Entities.TNurse;
 import HC.Logging.Logging;
+import HC.Main.GUI;
 import HC.Monitors.*;
 
 import java.io.BufferedReader;
@@ -29,6 +30,7 @@ public class TSocketHandler extends Thread {
     @Override
     public void run() {
         TCallCenter callCenter = null;
+        GUI gui = null;
 
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -63,9 +65,11 @@ public class TSocketHandler extends Thread {
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
 
+                            gui = new GUI(NoA, NoC, NoS);
+
                             // Create Monitors
-                            var eth = new METH(NoS, TTM, log);
-                            var evh = new MEVH(log, TTM);
+                            var eth = new METH(NoS, TTM, log, gui);
+                            var evh = new MEVH(TTM, log, gui);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
@@ -90,8 +94,6 @@ public class TSocketHandler extends Thread {
                                 var p = new TPatient(false, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
-                            
-                            
                             break;
                         case "MODE":
                             if (callCenter != null) {

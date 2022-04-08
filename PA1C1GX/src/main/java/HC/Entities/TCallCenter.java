@@ -2,6 +2,8 @@ package HC.Entities;
 
 import HC.Monitors.*;
 
+import java.util.concurrent.TimeUnit;
+
 public class TCallCenter extends Thread {
     private final METH eth;         // entrance hall
     private final MEVH evh;         // evaluation hall
@@ -29,9 +31,8 @@ public class TCallCenter extends Thread {
     }
 
     private boolean canCallPatient(IMonitor m1, IMonitor m2) {
-        /*return (m1.hasAdults() && !m2.isFullOfAdults()) ||
-                (m1.hasChildren() && !m2.isFullOfChildren());*/
-        return true;
+        return (m1.hasAdults() && !m2.isFullOfAdults()) ||
+                (m1.hasChildren() && !m2.isFullOfChildren());
     }
 
     @Override
@@ -41,15 +42,18 @@ public class TCallCenter extends Thread {
                 eth.get();
                 next = false;
             }
-
-            /*
             if (canCallPatient(evh, wth)) evh.get();
             if (canCallPatient(wth, mdh) && (auto || next)) {
                 wth.get();
                 next = false;
             }
             if (canCallPatient(mdh, pyh)) mdh.get();
-            */
+
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
