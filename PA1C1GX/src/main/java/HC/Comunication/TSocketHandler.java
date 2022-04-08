@@ -6,6 +6,7 @@ package HC.Comunication;
 
 import HC.Entities.TCallCenter;
 import HC.Entities.TPatient;
+import HC.Entities.TNurse;
 import HC.Logging.Logging;
 import HC.Monitors.*;
 
@@ -64,13 +65,20 @@ public class TSocketHandler extends Thread {
 
                             // Create Monitors
                             var eth = new METH(NoS, TTM, log);
-                            var evh = new MEVH();
+                            var evh = new MEVH(log, TTM);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
 
                             callCenter = new TCallCenter(eth, evh, wth, mdh, pyh);
-
+                            callCenter.start();
+                            
+                            // Create Nurses
+                            for(int i=0; i<4; i++){
+                                TNurse n  =  new TNurse(evh, ET);
+                                n.start();
+                            }
+                            
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
                                 var p = new TPatient(true, eth, evh, wth, mdh, pyh);
@@ -82,7 +90,8 @@ public class TSocketHandler extends Thread {
                                 var p = new TPatient(false, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
-
+                            
+                            
                             break;
                         case "MODE":
                             if (callCenter != null) {

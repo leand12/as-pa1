@@ -34,6 +34,8 @@ public class METH implements IMonitor {
     private int getChildIdx = 0;
     private int adultCount = 0;
     private int childCount = 0;
+    private int adultAwaitCount = 0;
+    private int childAwaitCount = 0;
 
     public METH(int NoS, int ttm, Logging log) {
         this.NoS = NoS / 2;
@@ -53,35 +55,36 @@ public class METH implements IMonitor {
 
     @Override
     public boolean hasAdults() {
-        return adultCount > 0;
+        return this.adultCount > 0;
     }
 
     @Override
     public boolean hasChildren() {
-        return childCount > 0;
+        return this.childCount > 0;
     }
 
     @Override
     public boolean isFullOfAdults() {
-        return adultCount == NoS;
+        return this.adultCount == this.NoS;
     }
 
     @Override
     public boolean isFullOfChildren() {
-        return childCount == NoS;
+        return this.childCount == this.NoS;
     }
 
     // Used by a patient in order to enter the Hall
+    @Override
     public void put(TPatient patient) {
         int pETN;
         try {
             rl.lock();
 
             if (patient.isAdult()) {
-                while (adultCount == NoS) {
+                while (this.adultAwaitCount == NoS) {
                     cAdult.await();
                 }
-                adultCount++;
+                this.adultAwaitCount++;
                 pETN = ETN;
                 ETN++;
 
@@ -94,15 +97,17 @@ public class METH implements IMonitor {
 
                 int tempIdx = putAdultIdx;
                 putAdultIdx = (putAdultIdx + 1) % NoS;
+                this.adultCount++;
                 adultFIFO[tempIdx] = patient;
                 carrayAdult[tempIdx] = rl.newCondition();
                 carrayAdult[tempIdx].await();
+                
 
             } else {
-                while (childCount == NoS) {
+                while (this.childAwaitCount == NoS) {
                     cChild.await();
                 }
-                childCount++;
+                this.childAwaitCount++;
                 pETN = ETN;
                 ETN++;
                 log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "C", pETN, " ", " ", " ", " ", " "));
@@ -114,16 +119,16 @@ public class METH implements IMonitor {
 
                 int tempIdx = putChildIdx;
                 putChildIdx = (putChildIdx + 1) % NoS;
+                this.childCount++;
                 childFIFO[tempIdx] = patient;
                 carrayChild[tempIdx] = rl.newCondition();
                 carrayChild[tempIdx].await();
+                
             }
             // assign ETN to patient
             patient.setETN(pETN);
 
-        } catch (InterruptedException err) {
-            System.err.println(err);
-        } catch (IOException err) {
+        } catch (InterruptedException | IOException err) {
             System.err.println(err);
         } finally {
             rl.unlock();
@@ -133,32 +138,42 @@ public class METH implements IMonitor {
     //A Patient can go to EVH
     @Override
     public void get() {
-
-        if (hasAdults() && hasChildren()) {
-
-            // remove adult
-            if (adultFIFO[(getAdultIdx + NoS - 1) % NoS].getETN() < childFIFO[(getAdultIdx + NoS - 1) % NoS].getETN()) {
-                adultCount--;
+         try {
+            rl.lock();
+            if (hasAdults() && hasChildren()) {
+                // remove adult
+                if (adultFIFO[getAdultIdx].getETN() < childFIFO[getAdultIdx].getETN()) {
+                    this.adultCount--;
+                    this.adultAwaitCount--;
+                    carrayAdult[getAdultIdx].signal();
+                    getAdultIdx = (getAdultIdx + 1) % NoS;
+                    cAdult.signal();
+                } else {
+                    this.childCount--;
+                    this.childAwaitCount--;
+                    carrayChild[getChildIdx].signal();
+                    getChildIdx = (getChildIdx + 1) % NoS;
+                    cChild.signal();
+                }
+            } else if (hasAdults()) {
+                this.adultCount--;
+                this.adultAwaitCount--;
                 carrayAdult[getAdultIdx].signal();
                 getAdultIdx = (getAdultIdx + 1) % NoS;
                 cAdult.signal();
-            } else {
-                childCount--;
+            } else if (hasChildren()) {
+                this.childCount--;
+                this.childAwaitCount--;
                 carrayChild[getChildIdx].signal();
                 getChildIdx = (getChildIdx + 1) % NoS;
                 cChild.signal();
             }
-        } else if (hasAdults()) {
-            adultCount--;
-            carrayAdult[getAdultIdx].signal();
-            getAdultIdx = (getAdultIdx + 1) % NoS;
-            cAdult.signal();
-        } else if (hasChildren()) {
-            childCount--;
-            carrayChild[getChildIdx].signal();
-            getChildIdx = (getChildIdx + 1) % NoS;
-            cChild.signal();
+        }catch(Exception e){
+         
+        } finally {
+            rl.unlock();
         }
+
     }
 }
 
