@@ -49,5 +49,9 @@ public class TPatient extends Thread {
         this.eth.put(this);
         this.evh.put(this);
     }
-    
+
+    @Override
+    public String toString() {
+        return String.format("%s%02d%s", isAdult ? "A" : "C", ETN, dos);
+    }
 }

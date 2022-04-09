@@ -8,7 +8,6 @@ import HC.Entities.TPatient;
 import HC.Logging.Logging;
 import HC.Main.GUI;
 
-import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -58,7 +57,6 @@ public class METH implements IMonitor {
 
     @Override
     public boolean hasAdults() {
-        System.out.println(this.adultCount);
         return this.adultCount > 0;
     }
 
@@ -80,7 +78,6 @@ public class METH implements IMonitor {
     // Used by a patient in order to enter the Hall
     @Override
     public void put(TPatient patient) {
-        int pETN;
         try {
             rl.lock();
 
@@ -89,18 +86,18 @@ public class METH implements IMonitor {
                     cAdult.await();
                 }
                 this.adultAwaitCount++;
-                pETN = ETN;
-                ETN++;
 
-                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "A", pETN, " ", " ", " ", " ", " "));
-                gui.addPatient("eth", patient);
+                // assign ETN to patient
+                patient.setETN(++ETN);
+
+                gui.addPatient("ETH", patient);
+                log.logPatient("ETH", patient);
 
                 // Move from ETH to ETR
                 Thread.sleep((int) Math.floor(Math.random() * ttm));
-                gui.removePatient("eth", patient);
-                gui.addPatient("etr2", patient);
-
-                log.log(String.format("%-4s| %3s %1s%2d %4s|%-21s|%-15s|%-25s|%-4s", " ", " ", "A", pETN, " ", " ", " ", " ", " "));
+                gui.removePatient("ETH", patient);
+                gui.addPatient("ET2", patient);
+                log.logPatient("ET2", patient);
 
                 int tempIdx = putAdultIdx;
                 putAdultIdx = (putAdultIdx + 1) % NoS;
@@ -109,26 +106,22 @@ public class METH implements IMonitor {
                 carrayAdult[tempIdx] = rl.newCondition();
                 carrayAdult[tempIdx].await();
 
-                // assign ETN to patient
-                patient.setETN(pETN);
-                gui.updateRoom("etr2");
-
             } else {
                 while (this.childAwaitCount == NoS) {
                     cChild.await();
                 }
                 this.childAwaitCount++;
-                pETN = ETN;
-                ETN++;
-                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "C", pETN, " ", " ", " ", " ", " "));
+                // assign ETN to patient
+                patient.setETN(++ETN);
+
+                gui.addPatient("ETH", patient);
+                log.logPatient("ETH", patient);
 
                 // Move from ETH to ETR
                 Thread.sleep((int) Math.floor(Math.random() * ttm));
-                gui.addPatient("eth", patient);
-
-                log.log(String.format("%-4s| %8s%1s%2d |%-21s|%-15s|%-25s|%-4s", " ", " ", "C", pETN, " ", " ", " ", " "));
-                gui.removePatient("eth", patient);
-                gui.addPatient("etr1", patient);
+                gui.removePatient("ETH", patient);
+                gui.addPatient("ET1", patient);
+                log.logPatient("ET1", patient);
 
                 int tempIdx = putChildIdx;
                 putChildIdx = (putChildIdx + 1) % NoS;
@@ -136,12 +129,8 @@ public class METH implements IMonitor {
                 childFIFO[tempIdx] = patient;
                 carrayChild[tempIdx] = rl.newCondition();
                 carrayChild[tempIdx].await();
-
-                // assign ETN to patient
-                patient.setETN(pETN);
-                gui.updateRoom("etr1");
             }
-        } catch (InterruptedException | IOException err) {
+        } catch (InterruptedException err) {
             System.err.println(err);
         } finally {
             rl.unlock();
@@ -153,20 +142,21 @@ public class METH implements IMonitor {
     public void get() {
         try {
             rl.lock();
+            // TODO: make condition empty
             if (hasAdults() && hasChildren()) {
                 // remove adult
                 if (adultFIFO[getAdultIdx].getETN() < childFIFO[getChildIdx].getETN()) {
                     this.adultCount--;
                     this.adultAwaitCount--;
                     carrayAdult[getAdultIdx].signal();
-                    gui.removePatient("etr2", adultFIFO[getAdultIdx]);
+                    gui.removePatient("ET2", adultFIFO[getAdultIdx]);
                     getAdultIdx = (getAdultIdx + 1) % NoS;
                     cAdult.signal();
                 } else {
                     this.childCount--;
                     this.childAwaitCount--;
                     carrayChild[getChildIdx].signal();
-                    gui.removePatient("etr1", childFIFO[getChildIdx]);
+                    gui.removePatient("ET1", childFIFO[getChildIdx]);
                     getChildIdx = (getChildIdx + 1) % NoS;
                     cChild.signal();
                 }
@@ -174,14 +164,14 @@ public class METH implements IMonitor {
                 this.adultCount--;
                 this.adultAwaitCount--;
                 carrayAdult[getAdultIdx].signal();
-                gui.removePatient("etr2", adultFIFO[getAdultIdx]);
+                gui.removePatient("ET2", adultFIFO[getAdultIdx]);
                 getAdultIdx = (getAdultIdx + 1) % NoS;
                 cAdult.signal();
             } else if (hasChildren()) {
                 this.childCount--;
                 this.childAwaitCount--;
                 carrayChild[getChildIdx].signal();
-                gui.removePatient("etr1", childFIFO[getChildIdx]);
+                gui.removePatient("ET1", childFIFO[getChildIdx]);
                 getChildIdx = (getChildIdx + 1) % NoS;
                 cChild.signal();
             }
@@ -190,7 +180,6 @@ public class METH implements IMonitor {
         } finally {
             rl.unlock();
         }
-
     }
 }
 

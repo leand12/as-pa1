@@ -57,7 +57,6 @@ public class MEVH implements IMonitor {
         } finally {
             rl1.unlock();
         }
-
     }
 
     @Override
@@ -89,26 +88,15 @@ public class MEVH implements IMonitor {
                 if (!this.roomOcupied[i]) {
                     this.roomOcupied[i] = true;
 
-                    String s = " ";
-                    String str = s.repeat(i * 5 + 1);
-                    String str1 = s.repeat(((4 - i) * 4) - i);
-
-                    if (patient.isAdult()) {
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s |%-15s|%-25s|%-4s", " ", " ", str, "A", patient.getETN(), str1, " ", " ", " ", " ", " "));
-                    } else {
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s |%-15s|%-25s|%-4s", " ", " ", str, "C", patient.getETN(), str1, " ", " ", " ", " ", " "));
-                    }
-                    gui.addPatient("evr" + (i + 1), patient);
+                    String room = "EVR" + (i + 1);
+                    log.logPatient(room, patient);
+                    gui.addPatient(room, patient);
 
                     patientCount++;
                     nurses[i].assignDos(patient);
 
-                    if (patient.isAdult()) {
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s%s|%-15s|%-25s|%-4s", " ", " ", str, "A", patient.getETN(), patient.getDos().toString().charAt(0), str1, " ", " ", " ", " "));
-                    } else {
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s%s|%-15s|%-25s|%-4s", " ", " ", str, "C", patient.getETN(), patient.getDos().toString().charAt(0), str1, " ", " ", " ", " ", " "));
-                    }
-                    gui.updateRoom("evr" + (i + 1));
+                    log.logPatient(room, patient);
+                    gui.updateRoom(room);
 
                     // patient moves to WTH
                     Thread.sleep((int) Math.floor(Math.random() * ttm));
@@ -116,10 +104,8 @@ public class MEVH implements IMonitor {
                     patientCount--;
                     break;
                 }
-
             }
-
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             System.err.println(e);
         } finally {
             rl.unlock();

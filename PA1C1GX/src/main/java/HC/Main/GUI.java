@@ -1,6 +1,7 @@
 package HC.Main;
 
 import HC.Entities.TPatient;
+import HC.Entities.DoS;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -53,25 +54,25 @@ public class GUI extends JFrame {
 
     private Seats getRoomSeats(String room) {
         return switch (room) {
-            case "eth" -> (Seats) eth.getComponent(0);
-            case "wth" -> (Seats) wth.getComponent(0);
-            case "pyh" -> (Seats) pyh.getComponent(0);
-            case "out" -> (Seats) out.getComponent(0);
-            case "etr1" -> (Seats) etr1.getComponent(0);
-            case "etr2" -> (Seats) etr2.getComponent(0);
-            case "evr1" -> (Seats) evr1.getComponent(0);
-            case "evr2" -> (Seats) evr2.getComponent(0);
-            case "evr3" -> (Seats) evr3.getComponent(0);
-            case "evr4" -> (Seats) evr4.getComponent(0);
-            case "wtr1" -> (Seats) wtr1.getComponent(0);
-            case "wtr2" -> (Seats) wtr2.getComponent(0);
-            case "mdw" -> (Seats) mdw.getComponent(0);
-            case "mdr1" -> (Seats) mdr1.getComponent(0);
-            case "mdr3" -> (Seats) mdr3.getComponent(0);
-            case "mdr4" -> (Seats) mdr4.getComponent(0);
-            case "mdr2" -> (Seats) mdr2.getComponent(0);
-            case "cashier" -> (Seats) cashier.getComponent(0);
-            default -> throw new IllegalArgumentException("Invalid room: " + room);
+            case "ETH" -> (Seats) eth.getComponent(0);
+            case "ET1" -> (Seats) etr1.getComponent(0);
+            case "ET2" -> (Seats) etr2.getComponent(0);
+            case "EVR1" -> (Seats) evr1.getComponent(0);
+            case "EVR2" -> (Seats) evr2.getComponent(0);
+            case "EVR3" -> (Seats) evr3.getComponent(0);
+            case "EVR4" -> (Seats) evr4.getComponent(0);
+            case "WTH" -> (Seats) wth.getComponent(0);
+            case "WTR1" -> (Seats) wtr1.getComponent(0);
+            case "WTR2" -> (Seats) wtr2.getComponent(0);
+            case "MDH" -> (Seats) mdw.getComponent(0);
+            case "MDH1" -> (Seats) mdr1.getComponent(0);
+            case "MDH2" -> (Seats) mdr2.getComponent(0);
+            case "MDH3" -> (Seats) mdr3.getComponent(0);
+            case "MDH4" -> (Seats) mdr4.getComponent(0);
+            case "PYH" -> (Seats) pyh.getComponent(0);
+            case "CSH" -> (Seats) cashier.getComponent(0);
+            case "OUT" -> (Seats) out.getComponent(0);
+            default -> throw new IllegalArgumentException("Room unrecognized: " + room);
         };
     }
 

@@ -42,8 +42,8 @@ public class TSocketHandler extends Thread {
 
             // Initializing log
             Logging log = new Logging();
-            log.log("STT | ETH ET1 ET2 | EVR1 EVR2 EVR3 EVR4 | WTH WTR1 WTR2 | MDH MDR1 MDR2 MDR3 MDR4 | PYH");
-            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "INI", " ", " ", " ", " ", " "));
+            log.logHead();
+            log.logState("INI");
 
             while (true) {
                 if ((inputLine = in.readLine()) != null) {
@@ -54,7 +54,7 @@ public class TSocketHandler extends Thread {
                         case "CONFIG":
 
                             //INIT
-                            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "RUN", " ", " ", " ", " ", " "));
+                            log.logState("RUN");
 
                             NoA = Integer.parseInt(clientMessage[1]);
                             NoC = Integer.parseInt(clientMessage[2]);
@@ -98,8 +98,10 @@ public class TSocketHandler extends Thread {
                         case "MODE":
                             if (callCenter != null) {
                                 if (clientMessage[1].equals("AUT")) {
+                                    log.logState("AUT");
                                     callCenter.setAuto(true);
                                 } else if (clientMessage[1].equals("MAN")) {
+                                    log.logState("MAN");
                                     callCenter.setAuto(false);
                                 }
                             }
@@ -115,7 +117,6 @@ public class TSocketHandler extends Thread {
                             break;
                     }
                 }
-
             }
         } catch (IOException e) {
             System.err.println("Socket error");
