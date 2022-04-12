@@ -5,11 +5,10 @@ import HC.Entities.TPatient;
 import HC.Logging.Logging;
 import HC.Main.GUI;
 
-import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MEVH implements IMonitor {
+public class MEVH implements IMEVH_Patient {
 
     private final ReentrantLock rl;
     private final ReentrantLock rl1;
@@ -60,27 +59,7 @@ public class MEVH implements IMonitor {
     }
 
     @Override
-    public boolean hasAdults() {
-        return this.patientCount > 0;
-    }
-
-    @Override
-    public boolean hasChildren() {
-        return this.patientCount > 0;
-    }
-
-    @Override
-    public boolean isFullOfAdults() {
-        return this.patientCount == 4;
-    }
-
-    @Override
-    public boolean isFullOfChildren() {
-        return this.patientCount == 4;
-    }
-
-    @Override
-    public void put(TPatient patient) {
+    public void enterPatient(TPatient patient) {
         try {
             rl.lock();
             for (int i = 0; i < 4; i++) {
@@ -110,10 +89,5 @@ public class MEVH implements IMonitor {
         } finally {
             rl.unlock();
         }
-    }
-
-    @Override
-    public void get() {
-
     }
 }

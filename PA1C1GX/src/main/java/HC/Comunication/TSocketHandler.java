@@ -68,13 +68,14 @@ public class TSocketHandler extends Thread {
                             gui = new GUI(NoA, NoC, NoS);
 
                             // Create Monitors
+                            var cch = new MCCH();
                             var eth = new METH(NoS, TTM, log, gui);
                             var evh = new MEVH(TTM, log, gui);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
 
-                            callCenter = new TCallCenter(eth, evh, wth, mdh, pyh);
+                            callCenter = new TCallCenter(cch, eth, wth, mdh, pyh);
                             callCenter.start();
                             
                             // Create Nurses

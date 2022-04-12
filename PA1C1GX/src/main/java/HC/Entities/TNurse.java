@@ -4,6 +4,7 @@
  */
 package HC.Entities;
 
+import HC.Data.DoS;
 import HC.Monitors.MEVH;
 
 import java.util.Random;

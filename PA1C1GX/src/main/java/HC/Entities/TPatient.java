@@ -4,6 +4,7 @@
  */
 package HC.Entities;
 
+import HC.Data.DoS;
 import HC.Monitors.*;
 
 /**
@@ -11,17 +12,18 @@ import HC.Monitors.*;
  * @author guids
  */
 public class TPatient extends Thread {
-    private final METH eth;         // entrance hall
-    private final MEVH evh;         // evaluation hall
-    private final MWTH wth;         // waiting hall
-    private final MMDH mdh;         // medical hall
-    private final MPYH pyh;         // payment hall
+    private final IMETH_Patient eth;         // entrance hall
+    private final IMEVH_Patient evh;         // evaluation hall
+    private final IMWTH_Patient wth;         // waiting hall
+    private final IMMDH_Patient mdh;         // medical hall
+    private final IMPYH_Patient pyh;         // payment hall
 
     private int ETN;            // entrance hall number
     private boolean isAdult;
     private DoS dos = DoS.NONE;            // degree of severity
 
-    public TPatient(boolean isAdult, METH eth, MEVH evh, MWTH wth, MMDH mdh, MPYH pyh) {
+    public TPatient(boolean isAdult, IMETH_Patient eth, IMEVH_Patient evh, IMWTH_Patient wth, IMMDH_Patient mdh,
+                    IMPYH_Patient pyh) {
         this.isAdult = isAdult;
         this.eth = eth;
         this.evh = evh;
@@ -46,8 +48,8 @@ public class TPatient extends Thread {
     
     @Override
     public void run(){
-        this.eth.put(this);
-        this.evh.put(this);
+        this.eth.enterPatient(this);
+        this.evh.enterPatient(this);
     }
 
     @Override

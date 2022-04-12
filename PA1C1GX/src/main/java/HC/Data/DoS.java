@@ -1,5 +1,8 @@
-package HC.Entities;
+package HC.Data;
 
+/**
+ * Degree of severity given to Patients
+ */
 public enum DoS {
     RED("R"),
     YELLOW("Y"),
