@@ -4,27 +4,31 @@
  */
 package HC.Entities;
 
-import HC.Data.DoS;
+import HC.Data.EDoS;
 import HC.Monitors.*;
+
+import static HC.Data.ERoom.*;
 
 /**
  *
  * @author guids
  */
 public class TPatient extends Thread {
-    private final IMETH_Patient eth;         // entrance hall
-    private final IMEVH_Patient evh;         // evaluation hall
-    private final IMWTH_Patient wth;         // waiting hall
-    private final IMMDH_Patient mdh;         // medical hall
-    private final IMPYH_Patient pyh;         // payment hall
+    private final ICCH_Patient cch;         // call center hall
+    private final IETH_Patient eth;         // entrance hall
+    private final IEVH_Patient evh;         // evaluation hall
+    private final IWTH_Patient wth;         // waiting hall
+    private final IMDH_Patient mdh;         // medical hall
+    private final IPYH_Patient pyh;         // payment hall
 
     private int ETN;            // entrance hall number
     private boolean isAdult;
-    private DoS dos = DoS.NONE;            // degree of severity
+    private EDoS dos = EDoS.NONE;            // degree of severity
 
-    public TPatient(boolean isAdult, IMETH_Patient eth, IMEVH_Patient evh, IMWTH_Patient wth, IMMDH_Patient mdh,
-                    IMPYH_Patient pyh) {
+    public TPatient(boolean isAdult, ICCH_Patient cch, IETH_Patient eth, IEVH_Patient evh, IWTH_Patient wth, IMDH_Patient mdh,
+                    IPYH_Patient pyh) {
         this.isAdult = isAdult;
+        this.cch = cch;
         this.eth = eth;
         this.evh = evh;
         this.wth = wth;
@@ -36,9 +40,9 @@ public class TPatient extends Thread {
         return isAdult;
     }
 
-    public DoS getDos() { return dos; }
+    public EDoS getDos() { return dos; }
 
-    public void setDos(DoS dos) { this.dos = dos; }
+    public void setDos(EDoS dos) { this.dos = dos; }
     
     public int getETN(){
         return ETN;
@@ -48,8 +52,12 @@ public class TPatient extends Thread {
     
     @Override
     public void run(){
-        this.eth.enterPatient(this);
-        this.evh.enterPatient(this);
+        eth.enterPatient(this);
+        cch.notifyExit(ETH, this);
+        evh.enterPatient(this);
+        wth.enterPatient(this);
+        cch.notifyExit(EVH, this);
+        // ...
     }
 
     @Override

@@ -1,6 +1,8 @@
 package HC.Monitors;
 
-import HC.Data.Room;
+import HC.Data.ERoom;
+import HC.Data.Notification;
+import HC.Entities.TPatient;
 
 import java.util.LinkedList;
 import java.util.concurrent.locks.Condition;
@@ -9,11 +11,11 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Monitor Call Center Hall, responsible for managing the movement of all Patients.
  */
-public class MCCH implements IMCCH_Patient, IMCCH_CallCenter {
+public class MCCH implements ICCH_Patient, ICCH_CallCenter {
     private final ReentrantLock rl;
     private final Condition cNotEmpty;
 
-    private final LinkedList<Room> notifications;
+    private final LinkedList<Notification> notifications;
 
     public MCCH() {
         rl = new ReentrantLock();
@@ -22,7 +24,7 @@ public class MCCH implements IMCCH_Patient, IMCCH_CallCenter {
     }
 
     @Override
-    public Room getNotification() {
+    public Notification getNotification() {
         try {
             rl.lock();
             while (notifications.isEmpty()) cNotEmpty.await();
@@ -37,10 +39,10 @@ public class MCCH implements IMCCH_Patient, IMCCH_CallCenter {
     }
 
     @Override
-    public void notifyExit(Room room) {
+    public void notifyExit(ERoom room, TPatient patient) {
         rl.lock();
-        notifications.addLast(room);
-        cNotEmpty.signal();
-        notify();   // notify work available
+        notifications.addLast(new Notification(room, patient));
+        cNotEmpty.signal(); // notify work available
+        rl.unlock();
     }
 }

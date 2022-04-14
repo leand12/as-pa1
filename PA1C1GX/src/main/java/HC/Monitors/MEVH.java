@@ -8,8 +8,7 @@ import HC.Main.GUI;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MEVH implements IMEVH_Patient {
-
+public class MEVH implements IEVH_Patient {
     private final ReentrantLock rl;
     private final ReentrantLock rl1;
     private final Condition cRoom;

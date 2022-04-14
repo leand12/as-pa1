@@ -75,7 +75,7 @@ public class TSocketHandler extends Thread {
                             var mdh = new MMDH();
                             var pyh = new MPYH();
 
-                            callCenter = new TCallCenter(cch, eth, wth, mdh, pyh);
+                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, pyh);
                             callCenter.start();
                             
                             // Create Nurses
@@ -86,13 +86,13 @@ public class TSocketHandler extends Thread {
                             
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(true, eth, evh, wth, mdh, pyh);
+                                var p = new TPatient(true, cch, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
 
                             // Create Child Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(false, eth, evh, wth, mdh, pyh);
+                                var p = new TPatient(false, cch, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
                             break;

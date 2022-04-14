@@ -2,7 +2,7 @@ package HC.Monitors;
 
 import HC.Entities.TPatient;
 
-public interface IMonitor_Patient {
+public interface IHall_Patient {
     /**
      * Attempt to enter a {@code patient} inside a hall.
      *

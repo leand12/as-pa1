@@ -2,7 +2,7 @@ package HC.Monitors;
 
 import HC.Entities.TPatient;
 
-public class MWTH implements IMWTH_CallCenter, IMWTH_Patient {
+public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
     @Override
     public void enterPatient(TPatient patient) {
@@ -11,6 +11,11 @@ public class MWTH implements IMWTH_CallCenter, IMWTH_Patient {
 
     @Override
     public void callPatient() {
+
+    }
+
+    @Override
+    public void callPatient2() {
 
     }
 }

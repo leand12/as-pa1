@@ -3,7 +3,7 @@ package HC.Data;
 /**
  * Degree of severity given to Patients
  */
-public enum DoS {
+public enum EDoS {
     RED("R"),
     YELLOW("Y"),
     BLUE("B"),
@@ -11,7 +11,7 @@ public enum DoS {
 
     private String custom;
 
-    DoS(String custom) {
+    EDoS(String custom) {
         this.custom = custom;
     }
 

@@ -4,7 +4,7 @@
  */
 package HC.Entities;
 
-import HC.Data.DoS;
+import HC.Data.EDoS;
 import HC.Monitors.MEVH;
 
 import java.util.Random;
@@ -24,9 +24,9 @@ public class TNurse extends Thread {
     }
 
     public void assignDos(TPatient patient) throws InterruptedException {
-        DoS dos = DoS.NONE;
-        while (dos == DoS.NONE) {
-            dos = DoS.values()[new Random().nextInt(DoS.values().length)];
+        EDoS dos = EDoS.NONE;
+        while (dos == EDoS.NONE) {
+            dos = EDoS.values()[new Random().nextInt(EDoS.values().length)];
         }
 
         // evaluation time

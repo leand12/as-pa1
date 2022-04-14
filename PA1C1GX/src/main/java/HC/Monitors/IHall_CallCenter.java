@@ -1,7 +1,7 @@
 package HC.Monitors;
 
 
-public interface IMonitor_CallCenter {
+public interface IHall_CallCenter {
     /**
      * Signal a Patient the CallCenter allows moving on
      */

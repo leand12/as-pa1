@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 
 public class GUI extends JFrame {
+    private final EventQueue queue = new EventQueue();
     private JPanel panel1;
     private JFormattedTextField formattedTextField1;
     private JFormattedTextField formattedTextField2;
@@ -40,15 +41,11 @@ public class GUI extends JFrame {
     private JPanel out;
 
     public GUI(int NoA, int NoC, int NoS) {
-        initComponents(NoA, NoC, NoS);
-    }
-
-    public GUI() {
-        initComponents(4, 4, 10);
+        queue.invokeLater(() -> initComponents(NoA, NoC, NoS));
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(GUI::new);
+        new GUI(4, 4, 10);
     }
 
     private Seats getRoomSeats(String room) {
@@ -76,15 +73,15 @@ public class GUI extends JFrame {
     }
 
     public void addPatient(String room, TPatient patient) {
-        getRoomSeats(room).addPatient(patient);
+        queue.invokeLater(() -> getRoomSeats(room).addPatient(patient));
     }
 
     public void removePatient(String room, TPatient patient) {
-        getRoomSeats(room).removePatient(patient);
+        queue.invokeLater(() -> getRoomSeats(room).removePatient(patient));
     }
 
     public void updateRoom(String room) {
-        getRoomSeats(room).repaint();
+        queue.invokeLater(() -> getRoomSeats(room).repaint());
     }
 
     private void initComponents(int NoA, int NoC, int NoS) {
@@ -328,7 +325,7 @@ public class GUI extends JFrame {
 
 
 abstract class Seats extends JPanel {
-    private static final int P = 5;
+    private static final int P = 3;
     private static final int R = 30;
     private static final int D = 2 * R;
 
@@ -345,9 +342,9 @@ abstract class Seats extends JPanel {
 
         // draw shape
         if (patient.isAdult()) {
-            paintTriangle(g2, x, y);
+            paintTriangle(g2, x, y, false);
         } else {
-            paintCircle(g2, x, y);
+            paintCircle(g2, x, y, false);
         }
 
         // draw ID label centered
@@ -357,26 +354,29 @@ abstract class Seats extends JPanel {
         g2.setFont(font);
         g2.setPaint(Color.BLACK);
         g2.drawString(text,
-                x + (D - metrics.stringWidth(text)) / 2,
-                y + (D - metrics.getHeight()) / 2 + metrics.getAscent());
+                x * D + P + (D - P - metrics.stringWidth(text)) / 2,
+                y * D + P + (D - P - metrics.getHeight()) / 2 + metrics.getAscent());
     }
 
-    protected void paintSquare(Graphics2D g2, int x, int y) {
-        Rectangle2D shape = new Rectangle2D.Double(x * D + P, y * D + P, D - P, D - P);
+    protected void paintSquare(Graphics2D g2, int x, int y, boolean isSeat) {
+        int P = isSeat ? this.P : this.P + 4;
+        Rectangle2D shape = new Rectangle2D.Double(x * D + P, y * D + P, D - 2*P, D - 2*P);
         g2.fill(shape);
     }
 
-    protected void paintTriangle(Graphics2D g2, int x, int y) {
+    protected void paintTriangle(Graphics2D g2, int x, int y, boolean isSeat) {
+        int P = isSeat ? this.P : this.P + 3;
         Path2D path = new Path2D.Double();
-        path.moveTo(x * D + P, y * D + D - P);
-        path.lineTo(x * D + D - P, y * D + D - P);
-        path.lineTo(x * D + D / 2.0, y * D + P);
+        path.moveTo(x * D + P, y * D + D - P);      // bottom left corner
+        path.lineTo(x * D + D - P, y * D + D - P);      // bottom right corner
+        path.lineTo(x * D + D / 2.0, y * D + P);    // upper corner
         path.closePath();
         g2.fill(path);
     }
 
-    protected void paintCircle(Graphics2D g2, int x, int y) {
-        Ellipse2D shape = new Ellipse2D.Double(x * D + P, y * D + P, D - P, D - P);
+    protected void paintCircle(Graphics2D g2, int x, int y, boolean isSeat) {
+        int P = isSeat ? this.P : this.P + 4;
+        Ellipse2D shape = new Ellipse2D.Double(x * D + P, y * D + P, D - 2*P, D - 2*P);
         g2.fill(shape);
     }
 }
@@ -492,11 +492,11 @@ class SeatsRoom extends Seats {
                 if (seat >= numberOfSeats) break;
 
                 if (seat < numberOfChildSeats) {
-                    paintCircle(g2, x, y);
+                    paintCircle(g2, x, y, true);
                 } else if (seat < numberOfAdultSeats + numberOfChildSeats) {
-                    paintTriangle(g2, x, y);
+                    paintTriangle(g2, x, y, true);
                 } else {
-                    paintSquare(g2, x, y);
+                    paintSquare(g2, x, y, true);
                 }
             }
         }
