@@ -4,12 +4,15 @@
  */
 package HC.Monitors;
 
+import HC.Data.ERoom;
 import HC.Entities.TPatient;
 import HC.Logging.Logging;
 import HC.Main.GUI;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static HC.Data.ERoom.*;
 
 /**
  * @author guids
@@ -60,14 +63,15 @@ public class METH implements IETH_Patient, IETH_CallCenter {
         return null;
     }
 
-    private Callback buildCallBack(TPatient patient, String room) {
+    private Callback buildCallBack(TPatient patient, ERoom room) {
         return new Callback() {
             public void before() {
                 // assign ETN to patient
                 patient.setETN(++ETN);
+                cNotBothEmpty.signal();     // signal CallCenter
 
-                gui.addPatient("ETH", patient);
-                log.logPatient("ETH", patient);
+                gui.addPatient(ETH, patient);
+                log.logPatient(ETH, patient);
             }
 
             public void work() {
@@ -82,9 +86,6 @@ public class METH implements IETH_Patient, IETH_CallCenter {
             public void after() {
                 gui.addPatient(room, patient);
                 log.logPatient(room, patient);
-                rl.lock();
-                cNotBothEmpty.signal();     // signal CallCenter
-                rl.unlock();
             }
         };
     }
@@ -92,9 +93,9 @@ public class METH implements IETH_Patient, IETH_CallCenter {
     @Override
     public void enterPatient(TPatient patient) {
         if (patient.isAdult()) {
-            adultFIFO.put(patient, buildCallBack(patient, "ET2"));
+            adultFIFO.put(patient, buildCallBack(patient, ET2));
         } else {
-            childFIFO.put(patient, buildCallBack(patient, "ET1"));
+            childFIFO.put(patient, buildCallBack(patient, ET1));
         }
     }
 

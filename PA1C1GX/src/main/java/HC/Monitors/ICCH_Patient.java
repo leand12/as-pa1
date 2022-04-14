@@ -1,6 +1,6 @@
 package HC.Monitors;
 
-import HC.Data.ERoom;
+import HC.Data.ERoom_CC;
 import HC.Entities.TPatient;
 
 public interface ICCH_Patient {
@@ -10,5 +10,5 @@ public interface ICCH_Patient {
      * @param room      the room from which a Patient can move on
      * @param patient   the Patient that is leaving the
      */
-    void notifyExit(ERoom room, TPatient patient);
+    void notifyExit(ERoom_CC room, TPatient patient);
 }

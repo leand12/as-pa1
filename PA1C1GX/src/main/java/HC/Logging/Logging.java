@@ -4,6 +4,7 @@
  */
 package HC.Logging;
 
+import HC.Data.ERoom;
 import HC.Entities.TPatient;
 
 import java.io.BufferedWriter;
@@ -20,8 +21,7 @@ public class Logging {
 
     private final BufferedWriter logfile;
     private final ReentrantLock rl;
-    private final ArrayList<String> headers = new ArrayList<>(Arrays.asList("STT", "ETH", "ET1", "ET2", "EVR1", "EVR2",
-            "EVR3", "EVR4", "WTR1", "WTR2", "MDH", "MDR1", "MDR2", "MDR3", "MDR4", "PYH", "OUT"));
+    private final ArrayList<ERoom> roomHeaders = new ArrayList<>(Arrays.asList(ERoom.values()));
 
     public Logging() throws IOException {
         this.logfile = new BufferedWriter(new FileWriter("src/main/java/HC/Logging/log.txt"));
@@ -36,10 +36,10 @@ public class Logging {
         log(String.format(" %-4s|%-13s|%-21s|%-16s|%-26s|%-4s", state, "", "", "", "", ""));
     }
 
-    public void logPatient(String room, TPatient patient) {
-        var args = new String[headers.size()];
+    public void logPatient(ERoom room, TPatient patient) {
+        var args = new String[1 + roomHeaders.size()];
         Arrays.fill(args, "");
-        int index = headers.indexOf(room);
+        int index = 1 + roomHeaders.indexOf(room);
         if (index == -1) {
             throw new IllegalArgumentException("Room not recognized.");
         }

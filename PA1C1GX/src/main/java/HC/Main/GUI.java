@@ -1,5 +1,6 @@
 package HC.Main;
 
+import HC.Data.ERoom;
 import HC.Entities.TPatient;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -13,10 +14,13 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class GUI extends JFrame {
     private final EventQueue queue = new EventQueue();
+    private final HashMap<TPatient, ERoom> patientsRoom = new HashMap<>();
     private JPanel panel1;
     private JFormattedTextField formattedTextField1;
     private JFormattedTextField formattedTextField2;
@@ -48,39 +52,39 @@ public class GUI extends JFrame {
         new GUI(4, 4, 10);
     }
 
-    private Seats getRoomSeats(String room) {
+    private Seats getRoomSeats(ERoom room) {
         return switch (room) {
-            case "ETH" -> (Seats) eth.getComponent(0);
-            case "ET1" -> (Seats) etr1.getComponent(0);
-            case "ET2" -> (Seats) etr2.getComponent(0);
-            case "EVR1" -> (Seats) evr1.getComponent(0);
-            case "EVR2" -> (Seats) evr2.getComponent(0);
-            case "EVR3" -> (Seats) evr3.getComponent(0);
-            case "EVR4" -> (Seats) evr4.getComponent(0);
-            case "WTH" -> (Seats) wth.getComponent(0);
-            case "WTR1" -> (Seats) wtr1.getComponent(0);
-            case "WTR2" -> (Seats) wtr2.getComponent(0);
-            case "MDH" -> (Seats) mdw.getComponent(0);
-            case "MDH1" -> (Seats) mdr1.getComponent(0);
-            case "MDH2" -> (Seats) mdr2.getComponent(0);
-            case "MDH3" -> (Seats) mdr3.getComponent(0);
-            case "MDH4" -> (Seats) mdr4.getComponent(0);
-            case "PYH" -> (Seats) pyh.getComponent(0);
-            case "CSH" -> (Seats) cashier.getComponent(0);
-            case "OUT" -> (Seats) out.getComponent(0);
+            case ETH -> (Seats) eth.getComponent(0);
+            case ET1 -> (Seats) etr1.getComponent(0);
+            case ET2 -> (Seats) etr2.getComponent(0);
+            case EVR1 -> (Seats) evr1.getComponent(0);
+            case EVR2 -> (Seats) evr2.getComponent(0);
+            case EVR3 -> (Seats) evr3.getComponent(0);
+            case EVR4 -> (Seats) evr4.getComponent(0);
+            case WTH -> (Seats) wth.getComponent(0);
+            case WTR1 -> (Seats) wtr1.getComponent(0);
+            case WTR2 -> (Seats) wtr2.getComponent(0);
+            case MDH -> (Seats) mdw.getComponent(0);
+            case MDR1 -> (Seats) mdr1.getComponent(0);
+            case MDR2 -> (Seats) mdr2.getComponent(0);
+            case MDR3 -> (Seats) mdr3.getComponent(0);
+            case MDR4 -> (Seats) mdr4.getComponent(0);
+            case PYH -> (Seats) pyh.getComponent(0);
+            case CSH -> (Seats) cashier.getComponent(0);
+            case OUT -> (Seats) out.getComponent(0);
             default -> throw new IllegalArgumentException("Room unrecognized: " + room);
         };
     }
 
-    public void addPatient(String room, TPatient patient) {
-        queue.invokeLater(() -> getRoomSeats(room).addPatient(patient));
+    public void addPatient(ERoom room, TPatient patient) {
+        queue.invokeLater(() -> {
+            ERoom prevRoom = patientsRoom.put(patient, room);
+            if (prevRoom != null) getRoomSeats(prevRoom).removePatient(patient);
+            getRoomSeats(room).addPatient(patient);
+        });
     }
 
-    public void removePatient(String room, TPatient patient) {
-        queue.invokeLater(() -> getRoomSeats(room).removePatient(patient));
-    }
-
-    public void updateRoom(String room) {
+    public void updateRoom(ERoom room) {
         queue.invokeLater(() -> getRoomSeats(room).repaint());
     }
 
@@ -392,17 +396,19 @@ class SeatsList extends Seats {
     @Override
     public void addPatient(TPatient patient) {
         if (patients.contains(patient))
-            throw new IllegalArgumentException("Patient already inside the room");
+            throw new IllegalArgumentException("Patient " + patient + " already inside the room");
 
         patients.add(patient);
+        repaint();
     }
 
     @Override
     public void removePatient(TPatient patient) {
         if (!patients.contains(patient))
-            throw new IllegalArgumentException("Patient not found");
+            throw new IllegalArgumentException("Patient " + patient + " not found");
 
         patients.remove(patient);
+        repaint();
     }
 
     @Override
@@ -439,7 +445,7 @@ class SeatsRoom extends Seats {
     @Override
     public void addPatient(TPatient patient) {
         if (Arrays.asList(patients).contains(patient))
-            throw new IllegalArgumentException("Patient already inside the room");
+            throw new IllegalArgumentException("Patient " + patient + " already inside the room");
 
         for (var i = 0; i < numberOfSeats; i++) {
             if (patients[i] == null) {
@@ -463,7 +469,7 @@ class SeatsRoom extends Seats {
                 }
             }
         }
-        throw new IllegalArgumentException("No seat available");
+        throw new IllegalArgumentException("No seat available for Patient " + patient);
     }
 
     @Override
@@ -476,7 +482,7 @@ class SeatsRoom extends Seats {
                 return;
             }
         }
-        throw new IllegalArgumentException("Patient not found");
+        throw new IllegalArgumentException("Patient " + patient + " not found");
     }
 
     @Override

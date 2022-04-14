@@ -64,6 +64,7 @@ public class TSocketHandler extends Thread {
                             MAT = Integer.parseInt(clientMessage[6]);
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
+                            TTM = 5000;
 
                             gui = new GUI(NoA, NoC, NoS);
 

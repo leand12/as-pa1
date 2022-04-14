@@ -7,7 +7,7 @@ package HC.Entities;
 import HC.Data.EDoS;
 import HC.Monitors.*;
 
-import static HC.Data.ERoom.*;
+import static HC.Data.ERoom_CC.*;
 
 /**
  *

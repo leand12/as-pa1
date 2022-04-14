@@ -1,13 +1,26 @@
 package HC.Data;
 
 /**
- * Rooms that required to be signaled to allow Patients to move on
+ * Rooms acknowledge by the Logger and/or GUI when updating them.
  */
 public enum ERoom {
     ETH,
-    EVH,  //*
+    ET1,
+    ET2,
+    EVR1,
+    EVR2,
+    EVR3,
+    EVR4,
     WTH,
-    WTRi,
-    MDW,
-    MDRi, //*
+    WTR1,
+    WTR2,
+    MDH,
+    MDR1,
+    MDR2,
+    MDR3,
+    MDR4,
+    PYH,
+    OUT,
+    // cashier
+    CSH
 }

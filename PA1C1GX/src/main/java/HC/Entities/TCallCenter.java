@@ -1,12 +1,12 @@
 package HC.Entities;
 
-import HC.Data.ERoom;
+import HC.Data.ERoom_CC;
 import HC.Data.Notification;
 import HC.Monitors.*;
 
 import java.util.HashMap;
 
-import static HC.Data.ERoom.*;
+import static HC.Data.ERoom_CC.*;
 
 
 class Room {
@@ -127,7 +127,7 @@ public class TCallCenter extends Thread {
     private final IMDH_CallCenter mdh;         // medical hall
     private final IPYH_CallCenter pyh;         // payment hall
 
-    private HashMap<ERoom, Room> state = new HashMap<>();   // occupation state of the simulation
+    private HashMap<ERoom_CC, Room> state = new HashMap<>();   // occupation state of the simulation
     private boolean auto = true;
     private boolean next = false;
 
@@ -191,7 +191,7 @@ public class TCallCenter extends Thread {
 
             // receive notification
             Notification notif = cch.getNotification();
-            ERoom roomType = notif.room;
+            ERoom_CC roomType = notif.room;
             TPatient patient = notif.patient;
 
             // update state

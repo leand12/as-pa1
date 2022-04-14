@@ -1,5 +1,6 @@
 package HC.Monitors;
 
+import HC.Data.ERoom;
 import HC.Entities.TNurse;
 import HC.Entities.TPatient;
 import HC.Logging.Logging;
@@ -66,7 +67,7 @@ public class MEVH implements IEVH_Patient {
                 if (!this.roomOcupied[i]) {
                     this.roomOcupied[i] = true;
 
-                    String room = "EVR" + (i + 1);
+                    ERoom room = ERoom.valueOf("EVR" + (i + 1));
                     log.logPatient(room, patient);
                     gui.addPatient(room, patient);
 

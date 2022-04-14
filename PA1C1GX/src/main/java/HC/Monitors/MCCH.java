@@ -1,6 +1,6 @@
 package HC.Monitors;
 
-import HC.Data.ERoom;
+import HC.Data.ERoom_CC;
 import HC.Data.Notification;
 import HC.Entities.TPatient;
 
@@ -39,7 +39,7 @@ public class MCCH implements ICCH_Patient, ICCH_CallCenter {
     }
 
     @Override
-    public void notifyExit(ERoom room, TPatient patient) {
+    public void notifyExit(ERoom_CC room, TPatient patient) {
         rl.lock();
         notifications.addLast(new Notification(room, patient));
         cNotEmpty.signal(); // notify work available
