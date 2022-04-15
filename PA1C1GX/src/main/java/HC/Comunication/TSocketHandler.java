@@ -64,14 +64,13 @@ public class TSocketHandler extends Thread {
                             MAT = Integer.parseInt(clientMessage[6]);
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
-                            TTM = 5000;
 
                             gui = new GUI(NoA, NoC, NoS);
 
                             // Create Monitors
                             var cch = new MCCH();
                             var eth = new METH(NoS, TTM, log, gui);
-                            var evh = new MEVH(TTM, log, gui);
+                            var evh = new MEVH(ET, TTM, log, gui);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
@@ -81,7 +80,7 @@ public class TSocketHandler extends Thread {
                             
                             // Create Nurses
                             for(int i=0; i<4; i++){
-                                TNurse n  =  new TNurse(evh, ET);
+                                TNurse n  =  new TNurse(evh);
                                 n.start();
                             }
                             

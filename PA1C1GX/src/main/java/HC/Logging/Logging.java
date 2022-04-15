@@ -40,9 +40,6 @@ public class Logging {
         var args = new String[1 + roomHeaders.size()];
         Arrays.fill(args, "");
         int index = 1 + roomHeaders.indexOf(room);
-        if (index == -1) {
-            throw new IllegalArgumentException("Room not recognized.");
-        }
         args[index] = patient.toString();
         log(String.format(" %-4s| %-4s%-4s%-4s| %-5s%-5s%-5s%-5s| %-5s%-5s%-5s| %-5s%-5s%-5s%-5s%-5s| %-4s",
                 (Object[]) args));
@@ -55,8 +52,8 @@ public class Logging {
             this.logfile.write(message);
             this.logfile.newLine();
             this.logfile.flush();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         } finally {
             rl.unlock();
         }

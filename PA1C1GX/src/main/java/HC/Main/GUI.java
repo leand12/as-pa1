@@ -12,10 +12,12 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+
+import static HC.Data.ERoom.*;
 
 
 public class GUI extends JFrame {
@@ -77,11 +79,31 @@ public class GUI extends JFrame {
     }
 
     public void addPatient(ERoom room, TPatient patient) {
-        queue.invokeLater(() -> {
-            ERoom prevRoom = patientsRoom.put(patient, room);
-            if (prevRoom != null) getRoomSeats(prevRoom).removePatient(patient);
-            getRoomSeats(room).addPatient(patient);
-        });
+        try {
+            queue.invokeAndWait(() -> {
+                ERoom prevRoom = patientsRoom.put(patient, room);
+                // remove patient automatically in case not removed before
+                if (prevRoom != null) getRoomSeats(prevRoom).removePatient(patient);
+                getRoomSeats(room).addPatient(patient);
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removePatient(ERoom room, TPatient patient) {
+        try {
+            queue.invokeAndWait(() -> {
+                patientsRoom.remove(patient);
+                getRoomSeats(room).removePatient(patient);
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void updateRoom(ERoom room) {
@@ -98,31 +120,31 @@ public class GUI extends JFrame {
             c.setLayout(new GridLayout(1, 1));
         }
 
-        eth.add(new SeatsList(), 0);
-        wth.add(new SeatsList(), 0);
-        pyh.add(new SeatsList(), 0);
-        out.add(new SeatsList(), 0);
+        eth.add(new SeatsList(ETH), 0);
+        wth.add(new SeatsList(WTH), 0);
+        pyh.add(new SeatsList(PYH), 0);
+        out.add(new SeatsList(OUT), 0);
 
         int n = NoS / 2;
-        etr1.add(new SeatsRoom(n, 0, n), 0);
-        etr2.add(new SeatsRoom(n, n, 0), 0);
+        etr1.add(new SeatsRoom(ET1, n, 0, n), 0);
+        etr2.add(new SeatsRoom(ET2, n, n, 0), 0);
 
-        evr1.add(new SeatsRoom(1, 0, 0), 0);
-        evr2.add(new SeatsRoom(1, 0, 0), 0);
-        evr3.add(new SeatsRoom(1, 0, 0), 0);
-        evr4.add(new SeatsRoom(1, 0, 0), 0);
+        evr1.add(new SeatsRoom(EVR1, 1, 0, 0), 0);
+        evr2.add(new SeatsRoom(EVR2, 1, 0, 0), 0);
+        evr3.add(new SeatsRoom(EVR3, 1, 0, 0), 0);
+        evr4.add(new SeatsRoom(EVR4, 1, 0, 0), 0);
 
-        wtr1.add(new SeatsRoom(n, 0, n), 0);
-        wtr2.add(new SeatsRoom(n, n, 0), 0);
+        wtr1.add(new SeatsRoom(WTR1, n, 0, n), 0);
+        wtr2.add(new SeatsRoom(WTR2, n, n, 0), 0);
 
-        mdw.add(new SeatsRoom(2, 1, 1), 0);
+        mdw.add(new SeatsRoom(MDH, 2, 1, 1), 0);
 
-        mdr1.add(new SeatsRoom(1, 0, 1), 0);
-        mdr2.add(new SeatsRoom(1, 0, 1), 0);
-        mdr3.add(new SeatsRoom(1, 1, 0), 0);
-        mdr4.add(new SeatsRoom(1, 1, 0), 0);
+        mdr1.add(new SeatsRoom(MDR1, 1, 0, 1), 0);
+        mdr2.add(new SeatsRoom(MDR2, 1, 0, 1), 0);
+        mdr3.add(new SeatsRoom(MDR3, 1, 1, 0), 0);
+        mdr4.add(new SeatsRoom(MDR4, 1, 1, 0), 0);
 
-        cashier.add(new SeatsRoom(1, 0, 0), 0);
+        cashier.add(new SeatsRoom(CSH, 1, 0, 0), 0);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("HC GUI");
@@ -332,6 +354,11 @@ abstract class Seats extends JPanel {
     private static final int P = 3;
     private static final int R = 30;
     private static final int D = 2 * R;
+    protected final ERoom room;
+
+    public Seats(ERoom room) {
+        this.room = room;
+    }
 
     abstract void addPatient(TPatient patient);
     abstract void removePatient(TPatient patient);
@@ -353,7 +380,7 @@ abstract class Seats extends JPanel {
 
         // draw ID label centered
         var font = new Font(null, Font.PLAIN, 18);
-        var text = String.valueOf(patient.getETN());
+        var text = String.valueOf(patient.getNN());
         var metrics = g2.getFontMetrics(font);
         g2.setFont(font);
         g2.setPaint(Color.BLACK);
@@ -389,14 +416,15 @@ abstract class Seats extends JPanel {
 class SeatsList extends Seats {
     private final ArrayList<TPatient> patients;
 
-    SeatsList() {
+    SeatsList(ERoom room) {
+        super(room);
         this.patients = new ArrayList<>();
     }
 
     @Override
     public void addPatient(TPatient patient) {
         if (patients.contains(patient))
-            throw new IllegalArgumentException("Patient " + patient + " already inside the room");
+            throw new IllegalArgumentException("Patient " + patient + " already inside the room " + room);
 
         patients.add(patient);
         repaint();
@@ -405,7 +433,7 @@ class SeatsList extends Seats {
     @Override
     public void removePatient(TPatient patient) {
         if (!patients.contains(patient))
-            throw new IllegalArgumentException("Patient " + patient + " not found");
+            throw new IllegalArgumentException("Patient " + patient + " not found in room " + room);
 
         patients.remove(patient);
         repaint();
@@ -435,7 +463,8 @@ class SeatsRoom extends Seats {
     private final int numberOfChildSeats;
     private final TPatient[] patients;
 
-    SeatsRoom(int numberOfSeats, int numberOfAdultSeats, int numberOfChildSeats) {
+    SeatsRoom(ERoom room, int numberOfSeats, int numberOfAdultSeats, int numberOfChildSeats) {
+        super(room);
         this.numberOfSeats = numberOfSeats;
         this.numberOfAdultSeats = numberOfAdultSeats;
         this.numberOfChildSeats = numberOfChildSeats;
@@ -445,7 +474,7 @@ class SeatsRoom extends Seats {
     @Override
     public void addPatient(TPatient patient) {
         if (Arrays.asList(patients).contains(patient))
-            throw new IllegalArgumentException("Patient " + patient + " already inside the room");
+            throw new IllegalArgumentException("Patient " + patient + " already inside the room " + room);
 
         for (var i = 0; i < numberOfSeats; i++) {
             if (patients[i] == null) {
@@ -469,7 +498,7 @@ class SeatsRoom extends Seats {
                 }
             }
         }
-        throw new IllegalArgumentException("No seat available for Patient " + patient);
+        throw new IllegalArgumentException("No seat available for Patient " + patient + " in room " + room);
     }
 
     @Override
@@ -482,7 +511,7 @@ class SeatsRoom extends Seats {
                 return;
             }
         }
-        throw new IllegalArgumentException("Patient " + patient + " not found");
+        throw new IllegalArgumentException("Patient " + patient + " not found in room " + room);
     }
 
     @Override

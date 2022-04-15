@@ -30,12 +30,11 @@ public class MCCH implements ICCH_Patient, ICCH_CallCenter {
             while (notifications.isEmpty()) cNotEmpty.await();
             return notifications.pollFirst();
 
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             rl.unlock();
         }
-        return null;
     }
 
     @Override

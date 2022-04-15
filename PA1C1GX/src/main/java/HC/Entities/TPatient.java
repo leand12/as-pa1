@@ -5,6 +5,7 @@
 package HC.Entities;
 
 import HC.Data.EDoS;
+import HC.Data.ERoom_CC;
 import HC.Monitors.*;
 
 import static HC.Data.ERoom_CC.*;
@@ -21,12 +22,12 @@ public class TPatient extends Thread {
     private final IMDH_Patient mdh;         // medical hall
     private final IPYH_Patient pyh;         // payment hall
 
-    private int ETN;            // entrance hall number
+    private int NN;            // entrance hall number
     private boolean isAdult;
     private EDoS dos = EDoS.NONE;            // degree of severity
 
-    public TPatient(boolean isAdult, ICCH_Patient cch, IETH_Patient eth, IEVH_Patient evh, IWTH_Patient wth, IMDH_Patient mdh,
-                    IPYH_Patient pyh) {
+    public TPatient(boolean isAdult, ICCH_Patient cch, IETH_Patient eth, IEVH_Patient evh, IWTH_Patient wth,
+                    IMDH_Patient mdh, IPYH_Patient pyh) {
         this.isAdult = isAdult;
         this.cch = cch;
         this.eth = eth;
@@ -44,24 +45,30 @@ public class TPatient extends Thread {
 
     public void setDos(EDoS dos) { this.dos = dos; }
     
-    public int getETN(){
-        return ETN;
+    public int getNN(){
+        return NN;
     }
 
-    public void setETN(int ETN) { this.ETN = ETN; }
+    public void setNN(int NN) { this.NN = NN; }
     
     @Override
     public void run(){
         eth.enterPatient(this);
-        cch.notifyExit(ETH, this);
+        notifyExit(ETH);  // FIXME: should it notify exit only when it enters the next room?
         evh.enterPatient(this);
-        wth.enterPatient(this);
-        cch.notifyExit(EVH, this);
-        // ...
+        notifyExit(EVH);
+//        wth.enterPatient(this); // call notifyExit(WTH) inside
+//        notifyExit(WTRi);
+//        mdh.enterPatient(this); // call notifyExit(MDW) inside
+//        notifyExit(MDRi);
+//        pyh.enterPatient(this);
+    }
+    public void notifyExit(ERoom_CC room) {
+        cch.notifyExit(room, this);
     }
 
     @Override
     public String toString() {
-        return String.format("%s%02d%s", isAdult ? "A" : "C", ETN, dos);
+        return String.format("%s%02d%s", isAdult ? "A" : "C", NN, dos);
     }
 }

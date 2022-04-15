@@ -15,14 +15,17 @@ class Room {
     private Occupation adults;
     private int pendingCalls = 0;   // the calls from the CallCenter that were not completed
     private Room next;
+    private final boolean needsCall;
 
-    public Room(int occ, int maxOcc) {
+    public Room(int occ, int maxOcc, boolean needsCall) {
         both = new Occupation(occ, maxOcc);
+        this.needsCall = needsCall;
     }
 
-    public Room(int childOcc, int childMaxOcc, int adultOcc, int adultMaxOcc) {
+    public Room(int childOcc, int childMaxOcc, int adultOcc, int adultMaxOcc, boolean needsCall) {
         children = new Occupation(childOcc, childMaxOcc);
         adults = new Occupation(adultOcc, adultMaxOcc);
+        this.needsCall = needsCall;
     }
 
     private Occupation getAdults() {
@@ -35,6 +38,10 @@ class Room {
 
     private int getMaxOcc() {
         return both == null ? adults.maxOcc + children.maxOcc : both.maxOcc;
+    }
+
+    private int getOcc() {
+        return both == null ? adults.occ + children.occ : both.occ;
     }
 
     private boolean hasChildren() {
@@ -56,7 +63,9 @@ class Room {
     }
 
     private boolean isFullOfPendingCalls() {
-        return pendingCalls >= getMaxOcc();
+//        System.out.println(pendingCalls);
+//        System.out.println(next.getMaxOcc() - next.getOcc());
+        return pendingCalls >= next.getMaxOcc() - next.getOcc();
     }
 
     public void setNext(Room next) {
@@ -84,12 +93,16 @@ class Room {
     public void removePatient(TPatient patient) {
         Occupation o = patient.isAdult() ? getAdults() : getChildren();
         o.decrement();
-        if (pendingCalls <= 0)
-            throw new IllegalCallerException("Cannot decrement calls when it's empty.");
-        pendingCalls--;
+        if (needsCall) {
+        System.out.println("decall " + pendingCalls);
+            if (pendingCalls <= 0)
+                throw new IllegalCallerException("Cannot decrement calls when it's empty.");
+            pendingCalls--;
+        }
     }
 
     public void callPatient() {
+        System.out.println("call " + pendingCalls);
         if (pendingCalls >= getMaxOcc())
             throw new IllegalCallerException("Cannot increment calls when it's full.");
         pendingCalls++;
@@ -105,7 +118,7 @@ class Room {
         }
 
         public void increment() {
-            if (occ < maxOcc)
+            if (occ >= maxOcc)
                 throw new IllegalCallerException("Cannot increment occupation when it's full.");
             occ++;
         }
@@ -117,7 +130,6 @@ class Room {
         }
     }
 }
-
 
 
 public class TCallCenter extends Thread {
@@ -142,22 +154,25 @@ public class TCallCenter extends Thread {
         int seats = NoS / 2;
         int total = NoA + NoC;
 
-        Room reth = new Room(NoC, seats, NoA, seats);
-        Room revh = new Room(0, 4);
-        Room rwth = new Room(0, total);
-        Room rwtri = new Room(0, seats, 0, seats);
-        Room rmdw = new Room(0, 1, 0, 1);
-        Room rmdri = new Room(0, 2, 0, 2);
+        Room reth = new Room(NoC, seats, NoA, seats, true);
+        Room revh = new Room(0, 4, false);
+        Room rwth = new Room(0, total, true);
+        Room rwtri = new Room(0, seats, 0, seats, true);
+        Room rmdw = new Room(0, 1, 0, 1, true);
+        Room rmdri = new Room(0, 2, 0, 2, false);
 
         reth.setNext(revh);
+        revh.setNext(rwth);
         rwth.setNext(rwtri);
         rwtri.setNext(rmdw);
         rmdw.setNext(rmdri);
 
         state.put(ETH, reth);
+        state.put(EVH, revh);
         state.put(WTH, rwth);
         state.put(WTRi, rwtri);
         state.put(MDW, rmdw);
+        state.put(MDRi, rmdri);
     }
 
     public void setAuto(boolean auto) {
@@ -172,30 +187,43 @@ public class TCallCenter extends Thread {
     public void run() {
         while (true) {
             // call patients
-            while (state.get(ETH).canCallPatient()) {
+            if (state.get(ETH).canCallPatient() && (auto || next)) {
+                System.out.println("CALL ETH");
                 state.get(ETH).callPatient();
                 eth.callPatient();
+                next = false;
             }
-            while (state.get(WTH).canCallPatient()) {
+            if (state.get(WTH).canCallPatient() && (auto || next)) {
+                System.out.println("CALL WTH");
+
                 state.get(WTH).callPatient();
                 wth.callPatient();
+                next = false;
             }
-            while (state.get(WTRi).canCallPatient()) {
+            if (state.get(WTRi).canCallPatient() && (auto || next)) {
+                System.out.println("CALL WTRi");
+
                 state.get(WTRi).callPatient();
                 wth.callPatient2();
+                next = false;
             }
-            while (state.get(MDW).canCallPatient()) {
+            if (state.get(MDW).canCallPatient() && (auto || next)) {
+                System.out.println("CALL MDW");
+
                 state.get(MDW).callPatient();
                 mdh.callPatient();
+                next = false;
             }
 
+
             // receive notification
-            Notification notif = cch.getNotification();
+            var notif = cch.getNotification();
+            System.out.println(notif);
             ERoom_CC roomType = notif.room;
             TPatient patient = notif.patient;
 
             // update state
-            Room room = state.get(roomType);
+            var room = state.get(roomType);
             room.removePatient(patient);
             room.getNext().addPatient(patient);
         }

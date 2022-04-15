@@ -5,6 +5,7 @@
 package HC.Entities;
 
 import HC.Data.EDoS;
+import HC.Monitors.IEVH_Nurse;
 import HC.Monitors.MEVH;
 
 import java.util.Random;
@@ -14,30 +15,19 @@ import java.util.Random;
  * @author guids
  */
 public class TNurse extends Thread {
+    private static int id = 0;
+    private final IEVH_Nurse evh;
+    private final int roomDedicated;
 
-    private final MEVH mevh;
-    private final int evt;
-
-    public TNurse(MEVH mevh, int evt) {
-        this.mevh = mevh;
-        this.evt = evt;
-    }
-
-    public void assignDos(TPatient patient) throws InterruptedException {
-        EDoS dos = EDoS.NONE;
-        while (dos == EDoS.NONE) {
-            dos = EDoS.values()[new Random().nextInt(EDoS.values().length)];
-        }
-
-        // evaluation time
-        Thread.sleep((int) Math.floor(Math.random() * evt));
-        patient.setDos(dos);
+    public TNurse(IEVH_Nurse evh) {
+        this.evh = evh;
+        roomDedicated = id++;
     }
 
     @Override
     public void run() {
-        mevh.assignNurse(this);
         while (true) {
+            evh.evaluatePatient(roomDedicated);
         }
     }
 
