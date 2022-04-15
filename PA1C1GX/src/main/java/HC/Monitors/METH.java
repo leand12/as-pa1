@@ -119,12 +119,11 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                     patient.setNN(++ETN);
                     cNotBothEmpty.signal();     // signal CallCenter
 
-                    gui.addPatient(ETH, patient);
                     log.logPatient(ETH, patient);
+                    gui.addPatient(ETH, patient);
                 }
                 rl.unlock();
                 {
-                    // move from ETH to ETRi
                     try {
                         Thread.sleep((int) Math.floor(Math.random() * ttm));
                     } catch (InterruptedException e) {
@@ -132,16 +131,19 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                     }
                 }
                 rl.lock();
+                // move from ETH to ETRi
                 // ensure patients enter in ascending ETN, as the TTM is performed outside the lock
                 while (patient.getNN() != nextETN) cNextETN.await();
                 nextETN++;
                 cNextETN.signalAll();
+                System.out.println(patient);
                 {
-                    gui.addPatient(room, patient);
                     log.logPatient(room, patient);
+                    gui.addPatient(room, patient);
                 }
                 while (!permitted[idx]) cond[idx].await();
                 permitted[idx] = false;
+                cNotFull.signal(); // hmmmm
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
@@ -155,7 +157,6 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                 while (isEmpty()) cNotEmpty.await();
                 count--;
                 fifo[idxGet] = null;
-                cNotFull.signal();
                 int idx = idxGet;
                 idxGet = (++idxGet) % size;
 

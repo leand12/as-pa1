@@ -63,8 +63,6 @@ class Room {
     }
 
     private boolean isFullOfPendingCalls() {
-//        System.out.println(pendingCalls);
-//        System.out.println(next.getMaxOcc() - next.getOcc());
         return pendingCalls >= next.getMaxOcc() - next.getOcc();
     }
 
@@ -94,7 +92,6 @@ class Room {
         Occupation o = patient.isAdult() ? getAdults() : getChildren();
         o.decrement();
         if (needsCall) {
-        System.out.println("decall " + pendingCalls);
             if (pendingCalls <= 0)
                 throw new IllegalCallerException("Cannot decrement calls when it's empty.");
             pendingCalls--;
@@ -102,7 +99,6 @@ class Room {
     }
 
     public void callPatient() {
-        System.out.println("call " + pendingCalls);
         if (pendingCalls >= getMaxOcc())
             throw new IllegalCallerException("Cannot increment calls when it's full.");
         pendingCalls++;
@@ -188,37 +184,28 @@ public class TCallCenter extends Thread {
         while (true) {
             // call patients
             if (state.get(ETH).canCallPatient() && (auto || next)) {
-                System.out.println("CALL ETH");
                 state.get(ETH).callPatient();
                 eth.callPatient();
                 next = false;
             }
             if (state.get(WTH).canCallPatient() && (auto || next)) {
-                System.out.println("CALL WTH");
-
                 state.get(WTH).callPatient();
                 wth.callPatient();
                 next = false;
             }
             if (state.get(WTRi).canCallPatient() && (auto || next)) {
-                System.out.println("CALL WTRi");
-
                 state.get(WTRi).callPatient();
                 wth.callPatient2();
                 next = false;
             }
             if (state.get(MDW).canCallPatient() && (auto || next)) {
-                System.out.println("CALL MDW");
-
                 state.get(MDW).callPatient();
                 mdh.callPatient();
                 next = false;
             }
 
-
             // receive notification
             var notif = cch.getNotification();
-            System.out.println(notif);
             ERoom_CC roomType = notif.room;
             TPatient patient = notif.patient;
 
