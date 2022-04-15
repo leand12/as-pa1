@@ -1,130 +1,114 @@
 package HC.Monitors;
 
-import HC.Entities.TPatient;
+import HC.Data.EDoS;
+import HC.Data.ERoom;
 import HC.Entities.TNurse;
+import HC.Entities.TPatient;
 import HC.Logging.Logging;
+import HC.Main.GUI;
 
-import java.io.IOException;
+import java.util.Random;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class MEVH implements IMonitor {
-    
+import static HC.Data.ERoom_CC.ETH;
+
+public class MEVH implements IEVH_Patient, IEVH_Nurse {
     private final ReentrantLock rl;
-    private final ReentrantLock rl1;
-    private final Condition cRoom;
-    private final Condition cNurse;
+    private final Condition cNotFull;
+    private final Condition[] cNotEvaluated;
     private final Logging log;
-    
-    private TNurse[] nurses;
-    private boolean roomOcupied[];
-    
-    private int patientCount=0;
-    private boolean nurseAssign = false;
-    private int ttm = 0;
-    
-    public MEVH(Logging log, int ttm){
-        this.rl = new ReentrantLock();
-        this.rl1 = new ReentrantLock();
-        this.cRoom = this.rl.newCondition();
-        this.cNurse = this.rl1.newCondition();
-        this.nurses = new TNurse[4];
-        this.roomOcupied = new boolean[4];
+    private final GUI gui;
+    private final TPatient[] rooms;
+    private final boolean[] evaluated;
+    private final int ttm;
+    private final int evt;      // evaluation time
+    private final int maxPatients = 4;
+
+    private int patientCount = 0;
+
+    public MEVH(int evt, int ttm, Logging log, GUI gui) {
         this.log = log;
+        this.gui = gui;
         this.ttm = ttm;
+        this.evt = evt;
+
+        rl = new ReentrantLock();
+        cNotFull = rl.newCondition();
+        cNotEvaluated = new Condition[maxPatients];
+        for (var i = 0; i < cNotEvaluated.length; i++)
+            cNotEvaluated[i] = rl.newCondition();
+        rooms = new TPatient[maxPatients];
+        evaluated = new boolean[maxPatients];
     }
-    
-    public void assignNurse(TNurse nurse){
+
+    @Override
+    public void enterPatient(TPatient patient) {
         try {
-            rl1.lock();
-            while(nurseAssign){
-                cNurse.await();
-            }
-            nurseAssign = true;
-            for(int i=0; i<4; i++){
-                if(nurses[i]== null){
-                    nurses[i] = nurse;
-                    break;
-                }
-            }
-            nurseAssign=false;
-            cNurse.signal();
-        } catch (InterruptedException ex) {
-        }finally{
-            rl1.unlock();
-        }
-        
-    }
-    
-    @Override
-    public boolean hasAdults() {
-        return this.patientCount>0;
-    }
+            rl.lock();
+            while (isFull()) cNotFull.await();
 
-    @Override
-    public boolean hasChildren() {
-        return this.patientCount>0;
-    }
-
-    @Override
-    public boolean isFullOfAdults() {
-        return this.patientCount == 4;
-    }
-
-    @Override
-    public boolean isFullOfChildren() {
-        return this.patientCount == 4;
-    }
-
-    @Override
-    public void put(TPatient patient) {
-        try {
-            for(int i=0; i<4; i++){
+            for (int i = 0; i < maxPatients; i++) {
                 // patient enters room
-                if(!this.roomOcupied[i]){
-                    this.roomOcupied[i] = true;
-                    
-                    String s = " ";
-                    String str = s.repeat(i*5+1);
-                    String str1 = s.repeat(((4-i)*4)-i);
-                    if(patient.isAdult()){
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s |%-15s|%-25s|%-4s", " ", " ",str, "A", patient.getETN(), str1," ", " ", " ", " ", " "));
-                    }
-                    else{
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s |%-15s|%-25s|%-4s", " ", " ",str, "C", patient.getETN(),str1, " ", " ", " ", " ", " "));
-                    }
+                if (rooms[i] == null) {
                     patientCount++;
-                    
-                    nurses[i].assignDos(patient);
-                    
-                    if(patient.isAdult()){
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s%s|%-15s|%-25s|%-4s", " ", " ",str, "A", patient.getETN(), patient.getDos().toString().charAt(0),str1, " ", " ", " ", " "));
-                    }
-                    else{
-                        log.log(String.format("%-4s|%13s|%s%1s%2d%s%s|%-15s|%-25s|%-4s", " ", " ",str, "C", patient.getETN(), patient.getDos().toString().charAt(0),str1," ", " ", " ", " ", " "));
-                    }
-                    
+                    rooms[i] = patient;
+//                    patient.notifyExit(ETH);  // FIXME: should notify be called here?
+
+                    var room = ERoom.valueOf("EVR" + (i + 1));
+                    log.logPatient(room, patient);
+                    gui.addPatient(room, patient);
+
+                    cNotEvaluated[i].signal();
+                    while (!evaluated[i]) cNotEvaluated[i].await();
+                    evaluated[i] = false;
+
+                    log.logPatient(room, patient);
+                    gui.updateRoom(room);
+                    rl.unlock();
+
                     // patient moves to WTH
                     Thread.sleep((int) Math.floor(Math.random() * ttm));
-                    this.roomOcupied[i] = false;
+
+                    rl.lock();
+                    this.rooms[i] = null;
                     patientCount--;
+                    cNotFull.signal();
+                    gui.removePatient(room, patient);
                     break;
                 }
-                
             }
-
-        }catch (IOException  | InterruptedException e) {
-            System.err.println(e);
-        }
-        finally{
-           
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            rl.unlock();
         }
     }
 
     @Override
-    public void get() {
+    public void evaluatePatient(int idx) {
+        try {
+            rl.lock();
+            while (rooms[idx] == null || rooms[idx].getDos() != EDoS.NONE)
+                cNotEvaluated[idx].await();
+            rl.unlock();
 
+            // evaluation time
+            Thread.sleep((int) Math.floor(Math.random() * evt));
+            EDoS dos = EDoS.values()[new Random().nextInt(EDoS.values().length - 1)];
+            rooms[idx].setDos(dos);
+
+            rl.lock();
+            evaluated[idx] = true;
+            cNotEvaluated[idx].signal();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            rl.unlock();
+        }
+    }
+
+    private boolean isFull() {
+        return patientCount >= maxPatients;
     }
 }

@@ -2,34 +2,20 @@ package HC.Monitors;
 
 import HC.Entities.TPatient;
 
-public class MWTH implements IMonitor {
-    @Override
-    public boolean hasAdults() {
-        return false;
-    }
+public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
     @Override
-    public boolean hasChildren() {
-        return false;
-    }
-
-    @Override
-    public boolean isFullOfAdults() {
-        return true;
-    }
-
-    @Override
-    public boolean isFullOfChildren() {
-        return true;
-    }
-
-    @Override
-    public void put(TPatient patient) {
+    public void enterPatient(TPatient patient) {
 
     }
 
     @Override
-    public void get() {
+    public void callPatient() {
+
+    }
+
+    @Override
+    public void callPatient2() {
 
     }
 }

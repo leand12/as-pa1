@@ -4,176 +4,185 @@
  */
 package HC.Monitors;
 
+import HC.Data.ERoom;
 import HC.Entities.TPatient;
 import HC.Logging.Logging;
+import HC.Main.GUI;
 
-import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static HC.Data.ERoom.*;
 
 /**
  * @author guids
  * Entrance Hall Monitor
  */
-public class METH implements IMonitor {
-    private final TPatient[] adultFIFO;
-    private final TPatient[] childFIFO;
-    private final Condition[] carrayAdult;
-    private final Condition[] carrayChild;
+public class METH implements IETH_Patient, IETH_CallCenter {
     private final ReentrantLock rl;
-    private final Condition cChild;
-    private final Condition cAdult;
+    private Condition cNotBothEmpty;
+    private Condition cNextETN;
+    private final MFIFO adultFIFO;
+    private final MFIFO childFIFO;
     private final Logging log;
+    private final GUI gui;
     private final int NoS;
 
     private int ETN = 0; // Patient Number
-    private int ttm = 0;
-    private int putAdultIdx = 0;
-    private int putChildIdx = 0;
-    private int getAdultIdx = 0;
-    private int getChildIdx = 0;
-    private int adultCount = 0;
-    private int childCount = 0;
-    private int adultAwaitCount = 0;
-    private int childAwaitCount = 0;
+    private int nextETN = 1;
+    private int ttm;
 
-    public METH(int NoS, int ttm, Logging log) {
+    public METH(int NoS, int ttm, Logging log, GUI gui) {
         this.NoS = NoS / 2;
         this.ttm = ttm;
         this.log = log;
-
-        adultFIFO = new TPatient[this.NoS];
-        childFIFO = new TPatient[this.NoS];
-
-        carrayAdult = new Condition[this.NoS];
-        carrayChild = new Condition[this.NoS];
+        this.gui = gui;
 
         rl = new ReentrantLock();
-        cAdult = rl.newCondition();
-        cChild = rl.newCondition();
+        cNotBothEmpty = rl.newCondition();
+        cNextETN = rl.newCondition();
+        adultFIFO = new MFIFO(rl, this.NoS);
+        childFIFO = new MFIFO(rl, this.NoS);
     }
 
-    @Override
-    public boolean hasAdults() {
-        return this.adultCount > 0;
-    }
-
-    @Override
-    public boolean hasChildren() {
-        return this.childCount > 0;
-    }
-
-    @Override
-    public boolean isFullOfAdults() {
-        return this.adultCount == this.NoS;
-    }
-
-    @Override
-    public boolean isFullOfChildren() {
-        return this.childCount == this.NoS;
-    }
-
-    // Used by a patient in order to enter the Hall
-    @Override
-    public void put(TPatient patient) {
-        int pETN;
+    /**
+     * @return the FIFO that has the next priority patient
+     */
+    private MFIFO getPriorityFIFO() {
         try {
             rl.lock();
-
-            if (patient.isAdult()) {
-                while (this.adultAwaitCount == NoS) {
-                    cAdult.await();
-                }
-                this.adultAwaitCount++;
-                pETN = ETN;
-                ETN++;
-
-                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "A", pETN, " ", " ", " ", " ", " "));
-
-                // Move from ETH to ETR
-                Thread.sleep((int) Math.floor(Math.random() * ttm));
-
-                log.log(String.format("%-4s| %3s %1s%2d %4s|%-21s|%-15s|%-25s|%-4s", " ", " ", "A", pETN, " ", " ", " ", " ", " "));
-
-                int tempIdx = putAdultIdx;
-                putAdultIdx = (putAdultIdx + 1) % NoS;
-                this.adultCount++;
-                adultFIFO[tempIdx] = patient;
-                carrayAdult[tempIdx] = rl.newCondition();
-                carrayAdult[tempIdx].await();
-                
-
-            } else {
-                while (this.childAwaitCount == NoS) {
-                    cChild.await();
-                }
-                this.childAwaitCount++;
-                pETN = ETN;
-                ETN++;
-                log.log(String.format("%-4s| %1s%2d %8s|%-21s|%-15s|%-25s|%-4s", " ", "C", pETN, " ", " ", " ", " ", " "));
-
-                // Move from ETH to ETR
-                Thread.sleep((int) Math.floor(Math.random() * ttm));
-
-                log.log(String.format("%-4s| %8s%1s%2d |%-21s|%-15s|%-25s|%-4s", " ", " ", "C", pETN, " ", " ", " ", " ", " "));
-
-                int tempIdx = putChildIdx;
-                putChildIdx = (putChildIdx + 1) % NoS;
-                this.childCount++;
-                childFIFO[tempIdx] = patient;
-                carrayChild[tempIdx] = rl.newCondition();
-                carrayChild[tempIdx].await();
-                
+            while (adultFIFO.isEmpty() && childFIFO.isEmpty()) {
+                cNotBothEmpty.await();
             }
-            // assign ETN to patient
-            patient.setETN(pETN);
 
-        } catch (InterruptedException | IOException err) {
-            System.err.println(err);
+            if (childFIFO.isEmpty() || (!adultFIFO.isEmpty() && adultFIFO.peek().getNN() < childFIFO.peek().getNN())) {
+                return adultFIFO;
+            }
+            return childFIFO;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             rl.unlock();
         }
     }
 
-    //A Patient can go to EVH
     @Override
-    public void get() {
-         try {
-            rl.lock();
-            if (hasAdults() && hasChildren()) {
-                // remove adult
-                if (adultFIFO[getAdultIdx].getETN() < childFIFO[getAdultIdx].getETN()) {
-                    this.adultCount--;
-                    this.adultAwaitCount--;
-                    carrayAdult[getAdultIdx].signal();
-                    getAdultIdx = (getAdultIdx + 1) % NoS;
-                    cAdult.signal();
-                } else {
-                    this.childCount--;
-                    this.childAwaitCount--;
-                    carrayChild[getChildIdx].signal();
-                    getChildIdx = (getChildIdx + 1) % NoS;
-                    cChild.signal();
-                }
-            } else if (hasAdults()) {
-                this.adultCount--;
-                this.adultAwaitCount--;
-                carrayAdult[getAdultIdx].signal();
-                getAdultIdx = (getAdultIdx + 1) % NoS;
-                cAdult.signal();
-            } else if (hasChildren()) {
-                this.childCount--;
-                this.childAwaitCount--;
-                carrayChild[getChildIdx].signal();
-                getChildIdx = (getChildIdx + 1) % NoS;
-                cChild.signal();
-            }
-        }catch(Exception e){
-         
-        } finally {
-            rl.unlock();
+    public void enterPatient(TPatient patient) {
+        if (patient.isAdult()) {
+            adultFIFO.put(patient, ET2);
+        } else {
+            childFIFO.put(patient, ET1);
+        }
+    }
+
+    @Override
+    public void callPatient() {
+        getPriorityFIFO().get();
+    }
+
+    class MFIFO {
+        private final TPatient[] fifo;
+        private final Condition[] cond;
+        private final ReentrantLock rl;
+        private final Condition cNotFull;
+        private final Condition cNotEmpty;
+        private final int size;
+        private int idxPut = 0;
+        private int idxGet = 0;
+        private int count = 0;
+        private final boolean permitted[];    // ensures a Patient keeps running if signal is performed before await
+
+        public MFIFO(ReentrantLock rl, int size) {
+            this.size = size;
+            fifo = new TPatient[size];
+            cond = new Condition[size];
+            permitted = new boolean[size];
+
+            this.rl = rl;
+            cNotEmpty = rl.newCondition();
+            cNotFull = rl.newCondition();
+            for (var i = 0; i < cond.length; i++)
+                cond[i] = rl.newCondition();
         }
 
+        public void put(TPatient patient, ERoom room) {
+            try {
+                rl.lock();
+                while (isFull()) cNotFull.await();
+                count++;
+                fifo[idxPut] = patient;
+                int idx = idxPut;
+                idxPut = (++idxPut) % size;
+                cNotEmpty.signal();
+                {
+                    // assign ETN to patient
+                    patient.setNN(++ETN);
+                    cNotBothEmpty.signal();     // signal CallCenter
+
+                    log.logPatient(ETH, patient);
+                    gui.addPatient(ETH, patient);
+                }
+                rl.unlock();
+                {
+                    try {
+                        Thread.sleep((int) Math.floor(Math.random() * ttm));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                rl.lock();
+                // move from ETH to ETRi
+                // ensure patients enter in ascending ETN, as the TTM is performed outside the lock
+                while (patient.getNN() != nextETN) cNextETN.await();
+                nextETN++;
+                cNextETN.signalAll();
+                System.out.println(patient);
+                {
+                    log.logPatient(room, patient);
+                    gui.addPatient(room, patient);
+                }
+                while (!permitted[idx]) cond[idx].await();
+                permitted[idx] = false;
+                cNotFull.signal(); // hmmmm
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                rl.unlock();
+            }
+        }
+
+        public void get() {
+            try {
+                rl.lock();
+                while (isEmpty()) cNotEmpty.await();
+                count--;
+                fifo[idxGet] = null;
+                int idx = idxGet;
+                idxGet = (++idxGet) % size;
+
+                permitted[idx] = true;
+                cond[idx].signal();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                rl.unlock();
+            }
+        }
+
+        /* thread-unsafe access methods */
+        /* should be called inside `rl` lock */
+
+        public TPatient peek() {
+            return fifo[idxGet];
+        }
+
+        public boolean isFull() {
+            return count == size;
+        }
+
+        public boolean isEmpty() {
+            return count == 0;
+        }
     }
 }
 

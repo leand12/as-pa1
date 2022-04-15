@@ -4,25 +4,32 @@
  */
 package HC.Entities;
 
+import HC.Data.EDoS;
+import HC.Data.ERoom_CC;
 import HC.Monitors.*;
+
+import static HC.Data.ERoom_CC.*;
 
 /**
  *
  * @author guids
  */
 public class TPatient extends Thread {
-    private final METH eth;         // entrance hall
-    private final MEVH evh;         // evaluation hall
-    private final MWTH wth;         // waiting hall
-    private final MMDH mdh;         // medical hall
-    private final MPYH pyh;         // payment hall
+    private final ICCH_Patient cch;         // call center hall
+    private final IETH_Patient eth;         // entrance hall
+    private final IEVH_Patient evh;         // evaluation hall
+    private final IWTH_Patient wth;         // waiting hall
+    private final IMDH_Patient mdh;         // medical hall
+    private final IPYH_Patient pyh;         // payment hall
 
-    private int ETN;            // entrance hall number
+    private int NN;            // entrance hall number
     private boolean isAdult;
-    private DoS dos = DoS.NONE;            // degree of severity
+    private EDoS dos = EDoS.NONE;            // degree of severity
 
-    public TPatient(boolean isAdult, METH eth, MEVH evh, MWTH wth, MMDH mdh, MPYH pyh) {
+    public TPatient(boolean isAdult, ICCH_Patient cch, IETH_Patient eth, IEVH_Patient evh, IWTH_Patient wth,
+                    IMDH_Patient mdh, IPYH_Patient pyh) {
         this.isAdult = isAdult;
+        this.cch = cch;
         this.eth = eth;
         this.evh = evh;
         this.wth = wth;
@@ -34,20 +41,34 @@ public class TPatient extends Thread {
         return isAdult;
     }
 
-    public DoS getDos() { return dos; }
+    public EDoS getDos() { return dos; }
 
-    public void setDos(DoS dos) { this.dos = dos; }
+    public void setDos(EDoS dos) { this.dos = dos; }
     
-    public int getETN(){
-        return ETN;
+    public int getNN(){
+        return NN;
     }
 
-    public void setETN(int ETN) { this.ETN = ETN; }
+    public void setNN(int NN) { this.NN = NN; }
     
     @Override
     public void run(){
-        this.eth.put(this);
-        this.evh.put(this);
+        eth.enterPatient(this);
+        notifyExit(ETH);  // FIXME: should it notify exit only when it enters the next room?
+        evh.enterPatient(this);
+        notifyExit(EVH);
+//        wth.enterPatient(this); // call notifyExit(WTH) inside
+//        notifyExit(WTRi);
+//        mdh.enterPatient(this); // call notifyExit(MDW) inside
+//        notifyExit(MDRi);
+//        pyh.enterPatient(this);
     }
-    
+    public void notifyExit(ERoom_CC room) {
+        cch.notifyExit(room, this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s%02d%s", isAdult ? "A" : "C", NN, dos);
+    }
 }

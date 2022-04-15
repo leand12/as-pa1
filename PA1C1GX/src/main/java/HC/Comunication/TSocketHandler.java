@@ -8,6 +8,7 @@ import HC.Entities.TCallCenter;
 import HC.Entities.TPatient;
 import HC.Entities.TNurse;
 import HC.Logging.Logging;
+import HC.Main.GUI;
 import HC.Monitors.*;
 
 import java.io.BufferedReader;
@@ -29,6 +30,7 @@ public class TSocketHandler extends Thread {
     @Override
     public void run() {
         TCallCenter callCenter = null;
+        GUI gui = null;
 
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -40,8 +42,8 @@ public class TSocketHandler extends Thread {
 
             // Initializing log
             Logging log = new Logging();
-            log.log("STT | ETH ET1 ET2 | EVR1 EVR2 EVR3 EVR4 | WTH WTR1 WTR2 | MDH MDR1 MDR2 MDR3 MDR4 | PYH");
-            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "INI", " ", " ", " ", " ", " "));
+            log.logHead();
+            log.logState("INI");
 
             while (true) {
                 if ((inputLine = in.readLine()) != null) {
@@ -52,7 +54,7 @@ public class TSocketHandler extends Thread {
                         case "CONFIG":
 
                             //INIT
-                            log.log(String.format("%-4s|%-13s|%-21s|%-15s|%-25s|%-4s", "RUN", " ", " ", " ", " ", " "));
+                            log.logState("RUN");
 
                             NoA = Integer.parseInt(clientMessage[1]);
                             NoC = Integer.parseInt(clientMessage[2]);
@@ -63,41 +65,44 @@ public class TSocketHandler extends Thread {
                             TTM = Integer.parseInt(clientMessage[7]);
                             mode = clientMessage[8];
 
+                            gui = new GUI(NoA, NoC, NoS);
+
                             // Create Monitors
-                            var eth = new METH(NoS, TTM, log);
-                            var evh = new MEVH(log, TTM);
+                            var cch = new MCCH();
+                            var eth = new METH(NoS, TTM, log, gui);
+                            var evh = new MEVH(ET, TTM, log, gui);
                             var wth = new MWTH();
                             var mdh = new MMDH();
                             var pyh = new MPYH();
 
-                            callCenter = new TCallCenter(eth, evh, wth, mdh, pyh);
+                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, pyh);
                             callCenter.start();
                             
                             // Create Nurses
                             for(int i=0; i<4; i++){
-                                TNurse n  =  new TNurse(evh, ET);
+                                TNurse n  =  new TNurse(evh);
                                 n.start();
                             }
                             
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(true, eth, evh, wth, mdh, pyh);
+                                var p = new TPatient(true, cch, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
 
                             // Create Child Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(false, eth, evh, wth, mdh, pyh);
+                                var p = new TPatient(false, cch, eth, evh, wth, mdh, pyh);
                                 p.start();
                             }
-                            
-                            
                             break;
                         case "MODE":
                             if (callCenter != null) {
                                 if (clientMessage[1].equals("AUT")) {
+                                    log.logState("AUT");
                                     callCenter.setAuto(true);
                                 } else if (clientMessage[1].equals("MAN")) {
+                                    log.logState("MAN");
                                     callCenter.setAuto(false);
                                 }
                             }
@@ -113,7 +118,6 @@ public class TSocketHandler extends Thread {
                             break;
                     }
                 }
-
             }
         } catch (IOException e) {
             System.err.println("Socket error");
