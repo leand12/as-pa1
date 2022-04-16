@@ -5,6 +5,7 @@
 package HC.Comunication;
 
 import HC.Entities.TCallCenter;
+import HC.Entities.TDoctor;
 import HC.Entities.TPatient;
 import HC.Entities.TNurse;
 import HC.Logging.Logging;
@@ -72,28 +73,25 @@ public class TSocketHandler extends Thread {
                             var eth = new METH(NoS, TTM, log, gui);
                             var evh = new MEVH(ET, TTM, log, gui);
                             var wth = new MWTH();
-                            var mdh = new MMDH();
+                            var mdh = new MMDH(MAT, TTM, log, gui);
                             var pyh = new MPYH();
 
                             callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, pyh);
                             callCenter.start();
-                            
-                            // Create Nurses
-                            for(int i=0; i<4; i++){
-                                TNurse n  =  new TNurse(evh);
-                                n.start();
+
+                            for (var i = 0; i < 4; i++) {
+                                // Create Nurses
+                                new TNurse(evh).start();
+                                // Create Doctors
+                                new TDoctor(mdh).start();
                             }
-                            
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(true, cch, eth, evh, wth, mdh, pyh);
-                                p.start();
+                                new TPatient(true, cch, eth, evh, wth, mdh, pyh).start();
                             }
-
                             // Create Child Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(false, cch, eth, evh, wth, mdh, pyh);
-                                p.start();
+                                new TPatient(false, cch, eth, evh, wth, mdh, pyh).start();
                             }
                             break;
                         case "MODE":

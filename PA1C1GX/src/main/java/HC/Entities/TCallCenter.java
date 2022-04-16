@@ -1,7 +1,6 @@
 package HC.Entities;
 
 import HC.Data.ERoom_CC;
-import HC.Data.Notification;
 import HC.Monitors.*;
 
 import java.util.HashMap;
@@ -74,13 +73,16 @@ class Room {
         return next;
     }
 
-    public boolean canCallPatient() {
+    public int canCallPatient() {
         if (next == null)
             throw new IllegalCallerException("Room does not has a next room to move patient.");
         if (isFullOfPendingCalls())
-            return false;
-        return (hasAdults() && !next.isFullOfAdults()) ||
-                (hasChildren() && !next.isFullOfChildren());
+            return 0;
+        if (hasAdults() && !next.isFullOfAdults())
+            return 1;
+        if (hasChildren() && !next.isFullOfChildren())
+            return 2;
+        return 0;
     }
 
     public void addPatient(TPatient patient) {
@@ -183,29 +185,31 @@ public class TCallCenter extends Thread {
     public void run() {
         while (true) {
             // call patients
-            if (state.get(ETH).canCallPatient() && (auto || next)) {
+            if (state.get(ETH).canCallPatient() != 0 && (auto || next)) {
                 state.get(ETH).callPatient();
                 eth.callPatient();
                 next = false;
             }
-            if (state.get(WTH).canCallPatient() && (auto || next)) {
+            if (state.get(WTH).canCallPatient() != 0 && (auto || next)) {
                 state.get(WTH).callPatient();
                 wth.callPatient();
                 next = false;
             }
-            if (state.get(WTRi).canCallPatient() && (auto || next)) {
+            if (state.get(WTRi).canCallPatient() != 0 && (auto || next)) {
                 state.get(WTRi).callPatient();
                 wth.callPatient2();
                 next = false;
             }
-            if (state.get(MDW).canCallPatient() && (auto || next)) {
+            int callType = state.get(MDW).canCallPatient();
+            if (callType != 0 && (auto || next)) {
                 state.get(MDW).callPatient();
-                mdh.callPatient();
+                mdh.callPatient(callType == 1);
                 next = false;
             }
 
             // receive notification
             var notif = cch.getNotification();
+//            System.out.println(notif);
             ERoom_CC roomType = notif.room;
             TPatient patient = notif.patient;
 

@@ -2,7 +2,6 @@ package HC.Monitors;
 
 import HC.Data.EDoS;
 import HC.Data.ERoom;
-import HC.Entities.TNurse;
 import HC.Entities.TPatient;
 import HC.Logging.Logging;
 import HC.Main.GUI;
