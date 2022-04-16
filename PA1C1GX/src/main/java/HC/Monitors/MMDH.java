@@ -21,7 +21,6 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
 
     private final int ttm;
     private final int mdt; // evaluation time
-    private int WTN = 0;
 
     public MMDH(int mdt, int ttm, Logging log, GUI gui) {
         this.mdt = mdt;
@@ -88,7 +87,6 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
         void put(TPatient patient) {
             try {
                 rl.lock();
-                patient.setNN(++WTN); // FIXME: remove line for testing
                 // enter MDW
                 System.out.println("Entering patient " + patient);
                 mdwSeat = patient;
