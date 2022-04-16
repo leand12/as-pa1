@@ -18,5 +18,4 @@ public class TDoctor extends Thread {
             mdh.examinePatient(roomDedicated);
         }
     }
-
 }

@@ -151,7 +151,7 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
         void examine(int idx) {
             try {
                 rl.lock();
-                while (rooms[idx] == null)
+                while (rooms[idx] == null || examined[idx])
                     cNotExamined[idx].await();
                 rl.unlock();
 

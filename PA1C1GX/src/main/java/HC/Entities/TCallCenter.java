@@ -135,19 +135,17 @@ public class TCallCenter extends Thread {
     private final IETH_CallCenter eth;         // entrance hall
     private final IWTH_CallCenter wth;         // waiting hall
     private final IMDH_CallCenter mdh;         // medical hall
-    private final IPYH_CallCenter pyh;         // payment hall
 
     private HashMap<ERoom_CC, Room> state = new HashMap<>();   // occupation state of the simulation
     private boolean auto = true;
     private boolean next = false;
 
     public TCallCenter(int NoS, int NoA, int NoC, ICCH_CallCenter cch, IETH_CallCenter eth, IWTH_CallCenter wth,
-                       IMDH_CallCenter mdh, IPYH_CallCenter pyh) {
+                       IMDH_CallCenter mdh) {
         this.cch = cch;
         this.eth = eth;
         this.wth = wth;
         this.mdh = mdh;
-        this.pyh = pyh;
 
         int seats = NoS / 2;
         int total = NoA + NoC;

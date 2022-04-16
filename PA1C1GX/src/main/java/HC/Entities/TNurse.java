@@ -25,5 +25,4 @@ public class TNurse extends Thread {
             evh.evaluatePatient(roomDedicated);
         }
     }
-
 }

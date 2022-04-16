@@ -4,10 +4,7 @@
  */
 package HC.Comunication;
 
-import HC.Entities.TCallCenter;
-import HC.Entities.TDoctor;
-import HC.Entities.TPatient;
-import HC.Entities.TNurse;
+import HC.Entities.*;
 import HC.Logging.Logging;
 import HC.Main.GUI;
 import HC.Monitors.*;
@@ -74,9 +71,9 @@ public class TSocketHandler extends Thread {
                             var evh = new MEVH(ET, TTM, log, gui);
                             var wth = new MWTH();
                             var mdh = new MMDH(MAT, TTM, log, gui);
-                            var pyh = new MPYH();
+                            var pyh = new MPYH(PT, TTM, log, gui);
 
-                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, pyh);
+                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh);
                             callCenter.start();
 
                             for (var i = 0; i < 4; i++) {
@@ -85,6 +82,8 @@ public class TSocketHandler extends Thread {
                                 // Create Doctors
                                 new TDoctor(mdh).start();
                             }
+                            // Create Cashier
+                            new TCashier(pyh).start();
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
                                 new TPatient(true, cch, eth, evh, wth, mdh, pyh).start();
