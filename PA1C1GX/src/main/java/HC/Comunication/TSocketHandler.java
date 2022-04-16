@@ -69,7 +69,7 @@ public class TSocketHandler extends Thread {
                             var cch = new MCCH();
                             var eth = new METH(NoS, TTM, log, gui);
                             var evh = new MEVH(ET, TTM, log, gui);
-                            var wth = new MWTH();
+                            var wth = new MWTH(NoS, TTM, log, gui);
                             var mdh = new MMDH(MAT, TTM, log, gui);
                             var pyh = new MPYH(PT, TTM, log, gui);
 
