@@ -57,11 +57,11 @@ public class TPatient extends Thread {
         notifyExit(ETH);  // FIXME: should it notify exit only when it enters the next room?
         evh.enterPatient(this);
         notifyExit(EVH);
-//        wth.enterPatient(this); // call notifyExit(WTH) inside
-//        notifyExit(WTRi);
-//        mdh.enterPatient(this); // call notifyExit(MDW) inside
-//        notifyExit(MDRi);
-//        pyh.enterPatient(this);
+        wth.enterPatient(this); // call notifyExit(WTH) inside
+        notifyExit(WTRi);
+        mdh.enterPatient(this); // call notifyExit(MDW) inside
+        notifyExit(MDRi);
+        pyh.enterPatient(this);
     }
     public void notifyExit(ERoom_CC room) {
         cch.notifyExit(room, this);

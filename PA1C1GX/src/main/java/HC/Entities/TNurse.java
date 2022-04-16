@@ -4,12 +4,7 @@
  */
 package HC.Entities;
 
-import HC.Data.EDoS;
 import HC.Monitors.IEVH_Nurse;
-import HC.Monitors.MEVH;
-
-import java.util.Random;
-
 
 /**
  * @author guids
@@ -30,5 +25,4 @@ public class TNurse extends Thread {
             evh.evaluatePatient(roomDedicated);
         }
     }
-
 }

@@ -4,9 +4,7 @@
  */
 package HC.Comunication;
 
-import HC.Entities.TCallCenter;
-import HC.Entities.TPatient;
-import HC.Entities.TNurse;
+import HC.Entities.*;
 import HC.Logging.Logging;
 import HC.Main.GUI;
 import HC.Monitors.*;
@@ -71,29 +69,28 @@ public class TSocketHandler extends Thread {
                             var cch = new MCCH();
                             var eth = new METH(NoS, TTM, log, gui);
                             var evh = new MEVH(ET, TTM, log, gui);
-                            var wth = new MWTH();
-                            var mdh = new MMDH();
-                            var pyh = new MPYH();
+                            var wth = new MWTH(NoS, TTM, log, gui);
+                            var mdh = new MMDH(MAT, TTM, log, gui);
+                            var pyh = new MPYH(PT, TTM, log, gui);
 
-                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, pyh);
+                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh);
                             callCenter.start();
-                            
-                            // Create Nurses
-                            for(int i=0; i<4; i++){
-                                TNurse n  =  new TNurse(evh);
-                                n.start();
+
+                            for (var i = 0; i < 4; i++) {
+                                // Create Nurses
+                                new TNurse(evh).start();
+                                // Create Doctors
+                                new TDoctor(mdh).start();
                             }
-                            
+                            // Create Cashier
+                            new TCashier(pyh).start();
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(true, cch, eth, evh, wth, mdh, pyh);
-                                p.start();
+                                new TPatient(true, cch, eth, evh, wth, mdh, pyh).start();
                             }
-
                             // Create Child Patients
                             for (var i = 0; i < NoA; i++) {
-                                var p = new TPatient(false, cch, eth, evh, wth, mdh, pyh);
-                                p.start();
+                                new TPatient(false, cch, eth, evh, wth, mdh, pyh).start();
                             }
                             break;
                         case "MODE":
