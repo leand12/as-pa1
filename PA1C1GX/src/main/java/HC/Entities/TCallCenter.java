@@ -203,7 +203,7 @@ public class TCallCenter extends Thread {
 
         int seats = NoS / 2;
 
-        Room reth = new Room("eth", NoC, NoC, NoA, NoA, true);
+        Room reth = new Room("eth", NoC + NoA, NoC + NoA, true);
         Room revh = new Room("evh", 0, 4, false);
         Room rwth = new Room("wth", 0, NoC, 0, NoA, true);
         Room rwtri = new Room("wtri", 0, seats, 0, seats, true);
@@ -283,9 +283,8 @@ public class TCallCenter extends Thread {
             // call patients if conditions apply
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
-                state.get(ETH);
                 state.get(ETH).callPatient(callType == 1);
-                eth.callPatient(callType == 1);
+                eth.callPatient();
                 next = false;
             }
             callType = state.get(WTH).canCallPatient();

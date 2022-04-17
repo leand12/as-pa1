@@ -49,14 +49,14 @@ public class METH implements IETH_Patient, IETH_CallCenter {
     /**
      * @return the FIFO that has the next priority patient
      */
-    private MFIFO getPriorityFIFO(boolean isAdult) {
+    private MFIFO getPriorityFIFO() {
         try {
             rl.lock();
-            while ((isAdult && adultFIFO.isEmpty()) || (!isAdult && childFIFO.isEmpty())) {
+            while (adultFIFO.isEmpty() && childFIFO.isEmpty()) {
                 cNotBothEmpty.await();
             }
 
-            if (isAdult) {
+            if (childFIFO.isEmpty() || (!adultFIFO.isEmpty() && adultFIFO.peek().getNN() < childFIFO.peek().getNN())) {
                 return adultFIFO;
             }
             return childFIFO;
@@ -77,8 +77,8 @@ public class METH implements IETH_Patient, IETH_CallCenter {
     }
 
     @Override
-    public void callPatient(boolean isAdult) {
-        getPriorityFIFO(isAdult).get();
+    public void callPatient() {
+        getPriorityFIFO().get();
     }
 
     class MFIFO {
