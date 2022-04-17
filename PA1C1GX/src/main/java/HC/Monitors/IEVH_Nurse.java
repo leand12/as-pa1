@@ -1,7 +1,5 @@
 package HC.Monitors;
 
-import HC.Entities.TNurse;
-
 public interface IEVH_Nurse {
     /**
      * Assign a DoS to a patient.

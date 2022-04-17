@@ -1,6 +1,7 @@
 package HC.Entities;
 
 import HC.Data.ERoom_CC;
+import HC.Logging.Logging;
 import HC.Monitors.*;
 
 import java.util.HashMap;
@@ -19,7 +20,6 @@ class Room {
     private Occupation both;
     private Occupation children;
     private Occupation adults;
-    private int pendingCalls = 0;   // the calls from the CallCenter that were not completed
     private Room next;
     private final boolean needsCall;
     private final String nome;
@@ -45,6 +45,12 @@ class Room {
         return both == null ? children : both;
     }
 
+    private int getTotalPendingCalls() {
+        if (both == null)
+            return adults.pendingCalls + children.pendingCalls;
+        return both.pendingCalls;
+    }
+
     private boolean hasChildrenToCall() {
         return getChildren().occ > getChildren().pendingCalls;
     }
@@ -64,11 +70,11 @@ class Room {
     }
 
     private boolean isFullOfAdultPendingCalls() {
-        return getAdults().pendingCalls >= next.getAdults().maxOcc - next.getAdults().occ;
+        return getTotalPendingCalls() >= next.getAdults().maxOcc - next.getAdults().occ;
     }
 
     private boolean isFullOfChildPendingCalls() {
-        return getChildren().pendingCalls >= next.getChildren().maxOcc - next.getChildren().occ;
+        return getTotalPendingCalls() >= next.getChildren().maxOcc - next.getChildren().occ;
     }
 
     public void setNext(Room next) {
@@ -82,9 +88,9 @@ class Room {
     public int canCallPatient() {
         if (next == null)
             throw new IllegalCallerException("Room does not has a next room to move patient.");
-        if (hasAdultsToCall() && !next.isFullOfAdults() && !isFullOfAdultPendingCalls())
+        if (hasAdultsToCall() && !isFullOfAdultPendingCalls() && !next.isFullOfAdults())
             return 1;
-        if (hasChildrenToCall() && !next.isFullOfChildren() && !isFullOfChildPendingCalls())
+        if (hasChildrenToCall() && !isFullOfChildPendingCalls() && !next.isFullOfChildren())
             return 2;
         return 0;
     }
@@ -111,7 +117,7 @@ class Room {
 
     class Occupation {
         private final int maxOcc;
-        private int pendingCalls;
+        private int pendingCalls = 0;   // the calls from the CallCenter that were not completed
         private int occ;
 
         public Occupation(int occ, int maxOcc) {
@@ -121,25 +127,25 @@ class Room {
 
         public void increment() {
             if (occ >= maxOcc)
-                throw new IllegalCallerException("Cannot increment occupation when it's full.");
+                throw new IllegalCallerException("Cannot increment occupation of " + nome + " when it's full.");
             occ++;
         }
 
         public void decrement() {
             if (occ <= 0)
-                throw new IllegalCallerException("Cannot decrement occupation when it's empty.");
+                throw new IllegalCallerException("Cannot decrement occupation of " + nome + " when it's empty.");
             occ--;
         }
 
         public void incrementCalls() {
             if (pendingCalls >= maxOcc)
-                throw new IllegalCallerException("Cannot increment calls when it's full.");
+                throw new IllegalCallerException("Cannot increment calls of " + nome + " when it's full.");
             pendingCalls++;
         }
 
         public void decrementCalls() {
             if (pendingCalls <= 0)
-                throw new IllegalCallerException("Cannot decrement calls when it's empty.");
+                throw new IllegalCallerException("Cannot decrement calls of " + nome + " when it's empty.");
             pendingCalls--;
         }
     }
@@ -171,11 +177,10 @@ public class TCallCenter extends Thread {
         this.mdh = mdh;
 
         int seats = NoS / 2;
-        int total = NoA + NoC;
 
-        Room reth = new Room("eth", NoC + NoA, NoS, true);
+        Room reth = new Room("eth", NoC, NoC, NoA, NoA, true);
         Room revh = new Room("evh", 0, 4, false);
-        Room rwth = new Room("wth", 0, total, true);
+        Room rwth = new Room("wth", 0, NoC, 0, NoA, true);
         Room rwtri = new Room("wtri", 0, seats, 0, seats, true);
         Room rmdw = new Room("mdw", 0, 1, 0, 1, true);
         Room rmdri = new Room("mdri", 0, 2, 0, 2, false);
@@ -254,7 +259,7 @@ public class TCallCenter extends Thread {
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
                 state.get(ETH).callPatient(callType == 1);
-                eth.callPatient();
+                eth.callPatient(callType == 1);
                 next = false;
             }
             callType = state.get(WTH).canCallPatient();

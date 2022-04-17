@@ -46,6 +46,7 @@ public class MEVH implements IEVH_Patient, IEVH_Nurse {
         try {
             rl.lock();
             while (isFull()) cNotFull.await();
+            patient.notifyExit(ETH);
 
             for (int i = 0; i < maxPatients; i++) {
                 // patient enters room

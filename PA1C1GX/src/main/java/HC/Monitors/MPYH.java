@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static HC.Data.ERoom.PYH;
 import static HC.Data.ERoom.CSH;
 import static HC.Data.ERoom.OUT;
+import static HC.Data.ERoom_CC.MDRi;
 
 public class MPYH implements IPYH_Patient, IPYH_Cashier {
     private final ReentrantLock rl;
@@ -40,6 +41,7 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
     public void enterPatient(TPatient patient) {
         try {
             rl.lock();
+            patient.notifyExit(MDRi);
 
             // enter PYH
             log.logPatient(PYH, patient);
