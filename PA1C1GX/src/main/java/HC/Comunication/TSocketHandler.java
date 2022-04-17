@@ -28,6 +28,11 @@ public class TSocketHandler extends Thread {
     @Override
     public void run() {
         TCallCenter callCenter = null;
+        TCashier cashier = null;
+        TPatient[] patients = null;
+        TNurse[] nurses = null;
+        TDoctor[] doctors = null;
+        
         GUI gui = null;
 
         try {
@@ -35,7 +40,7 @@ public class TSocketHandler extends Thread {
 
             String inputLine;
 
-            int NoA, NoC, NoS, PT, ET, MAT, TTM;
+            int NoA =0, NoC=0, NoS, PT, ET, MAT, TTM;
             String mode;
 
             // Initializing log
@@ -75,22 +80,31 @@ public class TSocketHandler extends Thread {
 
                             callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh);
                             callCenter.start();
-
+                            
+                            nurses = new TNurse[4];
+                            doctors = new TDoctor[4];
                             for (var i = 0; i < 4; i++) {
                                 // Create Nurses
-                                new TNurse(evh).start();
+                                nurses[i] = new TNurse(evh);
+                                nurses[i].start();
                                 // Create Doctors
-                                new TDoctor(mdh).start();
+                                doctors[i] = new TDoctor(mdh);
+                                doctors[i].start();
                             }
                             // Create Cashier
-                            new TCashier(pyh).start();
+                            cashier = new TCashier(pyh);
+                            cashier.start();
+                            
+                            patients = new TPatient[NoA + NoC];
                             // Create Adult Patients
                             for (var i = 0; i < NoA; i++) {
-                                new TPatient(true, cch, eth, evh, wth, mdh, pyh).start();
+                                patients[i]= new TPatient(true, cch, eth, evh, wth, mdh, pyh);
+                                patients[i].start();
                             }
                             // Create Child Patients
-                            for (var i = 0; i < NoA; i++) {
-                                new TPatient(false, cch, eth, evh, wth, mdh, pyh).start();
+                            for (var i = 0; i < NoC; i++) {
+                                patients[NoA+i] = new TPatient(false, cch, eth, evh, wth, mdh, pyh);
+                                patients[NoA+i].start();
                             }
                             break;
                         case "MODE":
@@ -109,6 +123,43 @@ public class TSocketHandler extends Thread {
                                 callCenter.allowNextPatient();
                             }
                             break;
+                        case "RUN":
+                            callCenter.res();
+                            cashier.res();
+                            for(int i =0; i< 4; i++){
+                                nurses[i].res();
+                                doctors[i].res();
+                            }
+                            for(int i =0; i< NoA+NoC; i++){
+                                patients[i].res();
+                            }
+                            
+                            break;
+                        case "SUS":
+                            for(int i =0; i< NoA+NoC; i++){
+                                patients[i].sus();
+                            }
+                            for(int i =0; i< 4; i++){
+                                nurses[i].sus();
+                                doctors[i].sus();
+                            }
+                            callCenter.sus();
+                            cashier.sus();
+                            break;
+                        case "STO":
+                            callCenter.exit();
+                            cashier.exit();
+                            for(int i =0; i< 4; i++){
+                                nurses[i].exit();
+                                doctors[i].exit();
+                            }
+                            for(int i =0; i< NoA+NoC; i++){
+                                patients[i].interrupt();
+                            }
+                            gui.dispose();
+                            TNurse.resetId();
+                            TDoctor.resetId();
+                            break;
                         case "END":
                             socket.close();
                             System.exit(0);
@@ -121,3 +172,5 @@ public class TSocketHandler extends Thread {
         }
     }
 }
+
+/* http://docs.oracle.com/javase/8/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html */

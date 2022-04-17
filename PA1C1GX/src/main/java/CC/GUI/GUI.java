@@ -427,12 +427,16 @@ public class GUI extends javax.swing.JFrame {
         suspendButton.setEnabled(false);
         resumeButton.setEnabled(true);
         stopButton.setEnabled(true);
+        
+        this.socket.sendMessage("SUS");
     }//GEN-LAST:event_suspendButtonActionPerformed
 
     private void resumeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resumeButtonActionPerformed
         resumeButton.setEnabled(false);
         suspendButton.setEnabled(true);
         stopButton.setEnabled(true);
+        
+        this.socket.sendMessage("RUN");
     }//GEN-LAST:event_resumeButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
@@ -455,6 +459,8 @@ public class GUI extends javax.swing.JFrame {
         ET.setEnabled(true);
         MAT.setEnabled(true);
         TTM.setEnabled(true);
+        
+        this.socket.sendMessage("STO");
     }//GEN-LAST:event_stopButtonActionPerformed
 
     private void endButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endButtonActionPerformed

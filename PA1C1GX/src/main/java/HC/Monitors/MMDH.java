@@ -65,7 +65,6 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
                 }
                 while (isFull(patient));  // allways wait for CC call
                 aPatient = null;
-                System.out.println("Bruhhhhhh");
                 for (int i = 2; i < 4; i++) {
                     // patient enters room
                     if (rooms[i] == null) {
@@ -110,7 +109,7 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
                 }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         } finally {
             rl.unlock();
         }

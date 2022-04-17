@@ -65,7 +65,8 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
             occupied = false;
             cNotOccupied.signal();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            rl.lock();
         } finally {
             rl.unlock();
         }

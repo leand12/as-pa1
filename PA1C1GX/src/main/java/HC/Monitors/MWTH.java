@@ -210,7 +210,7 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
                 cNotFull.signal();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             } finally {
                 rl.unlock();
             }
@@ -229,7 +229,7 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
                 permitted[idx] = false;
                 cNotFull.signal();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             } finally {
                 rl.unlock();
             }
