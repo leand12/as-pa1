@@ -12,6 +12,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static HC.Data.ERoom.*;
+import static HC.Data.ERoom_CC.EVH;
 
 public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
@@ -47,6 +48,7 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
         this.rl =  new ReentrantLock();
 
+        // FIXME: should be this size??
         this.challFIFO = new MFIFO(rl, NoS/2);
         this.ahallFIFO = new MFIFO(rl, NoS/2);
 
@@ -191,6 +193,8 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
 
                 // wait for CH call
                 while (isFull()) cNotFull.await();
+
+                patient.notifyExit(EVH);
 
                 count++;
                 fifo[idxPut] = patient;

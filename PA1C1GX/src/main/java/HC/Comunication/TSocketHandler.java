@@ -73,7 +73,7 @@ public class TSocketHandler extends Thread {
                             var mdh = new MMDH(MAT, TTM, log, gui);
                             var pyh = new MPYH(PT, TTM, log, gui);
 
-                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh);
+                            callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh, log);
                             callCenter.start();
 
                             for (var i = 0; i < 4; i++) {

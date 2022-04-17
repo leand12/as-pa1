@@ -498,6 +498,8 @@ class SeatsRoom extends Seats {
                 }
             }
         }
+        for (var i = 0; i < numberOfSeats; i++)
+            System.out.println(patients[i]);
         throw new IllegalArgumentException("No seat available for Patient " + patient + " in room " + room);
     }
 
