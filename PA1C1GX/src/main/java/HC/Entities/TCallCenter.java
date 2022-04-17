@@ -219,7 +219,6 @@ public class TCallCenter extends Thread {
             }
             callType = state.get(MDW).canCallPatient();
             if (callType != 0 && (auto || next)) {
-                state.get(MDW);
                 state.get(MDW).callPatient(callType == 1);
                 mdh.callPatient(callType == 1);
                 next = false;
