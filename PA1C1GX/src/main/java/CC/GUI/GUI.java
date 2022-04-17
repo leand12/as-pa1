@@ -398,10 +398,9 @@ public class GUI extends javax.swing.JFrame {
         else{
             movePatientButton.setEnabled(true);
         }
-        // Send updated mode if during a simulation
-        if(!startButton.isEnabled()){
-            this.socket.sendMessage(String.format("MODE:%s",  opertationModeCombo.getSelectedItem()));
-        }
+
+        this.socket.sendMessage(String.format("MODE:%s",  opertationModeCombo.getSelectedItem()));
+
     }//GEN-LAST:event_opertationModeComboActionPerformed
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
