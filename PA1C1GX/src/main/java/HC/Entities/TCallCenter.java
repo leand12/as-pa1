@@ -146,6 +146,10 @@ class Room {
 
 
 public class TCallCenter extends Thread {
+    
+    private volatile boolean threadSuspended;
+    private boolean exit = false;
+    
     private final ICCH_CallCenter cch;         // call center hall
     private final IETH_CallCenter eth;         // entrance hall
     private final IWTH_CallCenter wth;         // waiting hall
@@ -192,10 +196,23 @@ public class TCallCenter extends Thread {
     public void allowNextPatient() {
         this.next = true;
     }
+    
+    public synchronized void sus(){
+        threadSuspended = true;
+    }
+    
+    public synchronized void res(){
+        threadSuspended = false;
+        notify();
+    }
+    
+    public void exit(){
+        exit = true;
+    }
 
     @Override
     public void run() {
-        while (true) {
+        while (!exit) {
             int callType;
 
             // call patients
@@ -234,6 +251,17 @@ public class TCallCenter extends Thread {
             room.removePatient(patient);
             var nextRoom = room.getNext();
             if (nextRoom != null) nextRoom.addPatient(patient);
+            
+            synchronized(this) {
+            while (threadSuspended)
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                }
+            }
         }
+        
+        
     }
 }

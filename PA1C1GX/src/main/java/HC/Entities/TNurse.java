@@ -10,6 +10,9 @@ import HC.Monitors.IEVH_Nurse;
  * @author guids
  */
 public class TNurse extends Thread {
+    
+    private volatile boolean threadSuspended;
+    private boolean exit = false;
     private static int id = 0;
     private final IEVH_Nurse evh;
     private final int roomDedicated;
@@ -21,8 +24,34 @@ public class TNurse extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!exit) {
             evh.evaluatePatient(roomDedicated);
         }
+        synchronized(this) {
+            while (threadSuspended)
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                }
+        }
+    }
+    
+    
+    public synchronized void sus(){
+        threadSuspended = true;
+    }
+    
+    public synchronized void res(){
+        threadSuspended = false;
+        notify();
+    }
+    
+    public static void resetId(){
+        id=0;
+    }
+    
+    public void exit(){
+        exit = true;
     }
 }

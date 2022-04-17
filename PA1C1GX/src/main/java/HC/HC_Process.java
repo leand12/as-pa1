@@ -4,7 +4,6 @@
  */
 package HC;
 
-import HC.Main.GUI;
 import HC.Comunication.TSocketHandler;
 
 import java.net.ServerSocket;

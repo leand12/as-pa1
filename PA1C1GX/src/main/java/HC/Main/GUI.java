@@ -87,7 +87,7 @@ public class GUI extends JFrame {
                 getRoomSeats(room).addPatient(patient);
             });
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -100,7 +100,7 @@ public class GUI extends JFrame {
                 getRoomSeats(room).removePatient(patient);
             });
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }

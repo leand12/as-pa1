@@ -79,7 +79,7 @@ public class MEVH implements IEVH_Patient, IEVH_Nurse {
                 }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         } finally {
             rl.unlock();
         }

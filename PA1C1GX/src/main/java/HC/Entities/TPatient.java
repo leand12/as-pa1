@@ -9,12 +9,17 @@ import HC.Data.ERoom_CC;
 import HC.Monitors.*;
 
 import static HC.Data.ERoom_CC.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author guids
  */
 public class TPatient extends Thread {
+    
+    private volatile boolean threadSuspended;
+    
     private final ICCH_Patient cch;         // call center hall
     private final IETH_Patient eth;         // entrance hall
     private final IEVH_Patient evh;         // evaluation hall
@@ -53,18 +58,41 @@ public class TPatient extends Thread {
     
     @Override
     public void run(){
+        
         eth.enterPatient(this);
         evh.enterPatient(this);
         wth.enterPatient(this); // call notifyExit(WTH) inside
         mdh.enterPatient(this); // call notifyExit(MDW) inside
         pyh.enterPatient(this);
+
+        synchronized(this) {
+            while (threadSuspended)
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                }
+        }
+
+        
     }
     public void notifyExit(ERoom_CC room) {
         cch.notifyExit(room, this);
     }
-
+    
+    public synchronized void sus(){
+        threadSuspended = true;
+    }
+    
+    public synchronized void res(){
+        threadSuspended = false;
+        notify();
+    }
+    
     @Override
     public String toString() {
         return String.format("%s%02d%s", isAdult ? "A" : "C", NN, dos);
     }
+    
+    
 }

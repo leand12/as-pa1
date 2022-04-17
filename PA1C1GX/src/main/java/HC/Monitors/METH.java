@@ -144,7 +144,7 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                 permitted[idx] = false;
                 cNotFull.signal(); // hmmmm
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             } finally {
                 rl.unlock();
             }

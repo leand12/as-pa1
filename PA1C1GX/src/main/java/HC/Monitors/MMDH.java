@@ -139,7 +139,6 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
 
         void get() {
             rl.lock();
-//            System.out.println("Sempre siga");
             permitted = true;
             cNotPermitted.signal();
             rl.unlock();
