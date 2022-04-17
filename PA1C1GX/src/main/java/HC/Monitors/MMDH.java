@@ -13,16 +13,19 @@ import static HC.Data.ERoom.MDH;
 import static HC.Data.ERoom_CC.MDW;
 import static HC.Data.ERoom_CC.WTRi;
 
+/**
+ * Medical Hall, where medical appointments take place.
+ */
 public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
     private final ReentrantLock rl;
-    private final MRooms adults;
-    private final MRooms children;
+    private final MRooms adults;    // represents the adults in the MDW and MDR3 and MDR4
+    private final MRooms children;  // represents the children in the MDW and MDR1 and MDR2
 
     private final Logging log;
     private final GUI gui;
 
-    private final int ttm;
-    private final int mdt; // evaluation time
+    private final int ttm;      // time to move
+    private final int mdt;      // medical appointment time
 
     public MMDH(int mdt, int ttm, Logging log, GUI gui) {
         this.mdt = mdt;
@@ -159,6 +162,7 @@ public class MMDH implements IMDH_CallCenter, IMDH_Patient, IMDH_Doctor {
                 Thread.sleep((int) Math.floor(Math.random() * mdt));
 
                 rl.lock();
+                // allow Patient to move on
                 examined[idx] = true;
                 cNotExamined[idx].signal();
             } catch (InterruptedException e) {

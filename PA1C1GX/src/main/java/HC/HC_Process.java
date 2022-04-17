@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
+ * The Health Center Process, where patients’ treatments are carried out.
  *
  * @author guids
  */

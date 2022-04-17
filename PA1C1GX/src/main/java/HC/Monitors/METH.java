@@ -15,22 +15,23 @@ import java.util.concurrent.locks.ReentrantLock;
 import static HC.Data.ERoom.*;
 
 /**
+ * Entrance Hall Monitor, where patients wait for the assessment of their DoS.
+ *
  * @author guids
- * Entrance Hall Monitor
  */
 public class METH implements IETH_Patient, IETH_CallCenter {
     private final ReentrantLock rl;
     private Condition cNotBothEmpty;
     private Condition cNextETN;
-    private final MFIFO adultFIFO;
-    private final MFIFO childFIFO;
+    private final MFIFO adultFIFO;  // the representation of the ET2 room
+    private final MFIFO childFIFO;  // the representation of the ET1 room
     private final Logging log;
     private final GUI gui;
     private final int NoS;
 
-    private int ETN = 0; // Patient Number
-    private int nextETN = 1;
-    private int ttm;
+    private int ETN = 0;            // Patient Number
+    private int nextETN = 1;        // the next ETN allowed, to give access in ascending order
+    private int ttm;                // time to move
 
     public METH(int NoS, int ttm, Logging log, GUI gui) {
         this.NoS = NoS / 2;
@@ -142,7 +143,7 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                 }
                 while (!permitted[idx]) cond[idx].await();
                 permitted[idx] = false;
-                cNotFull.signal(); // hmmmm
+                cNotFull.signal();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } finally {
@@ -158,7 +159,7 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                 fifo[idxGet] = null;
                 int idx = idxGet;
                 idxGet = (++idxGet) % size;
-
+                // allow Patient to move on
                 permitted[idx] = true;
                 cond[idx].signal();
             } catch (InterruptedException e) {

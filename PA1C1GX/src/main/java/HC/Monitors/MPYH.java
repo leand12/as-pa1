@@ -12,6 +12,9 @@ import static HC.Data.ERoom.CSH;
 import static HC.Data.ERoom.OUT;
 import static HC.Data.ERoom_CC.MDRi;
 
+/**
+ * Payment Hall Monitor, where payments take place.
+ */
 public class MPYH implements IPYH_Patient, IPYH_Cashier {
     private final ReentrantLock rl;
     private final Condition cNotOccupied;
@@ -20,10 +23,10 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
     private final Logging log;
     private final GUI gui;
 
-    private final int ttm;
-    private final int pyt; // payment time
+    private final int ttm;      // time to move
+    private final int pyt;      // payment time
 
-    private boolean occupied = false;
+    private boolean occupied = false;   // whether cashier is occupied with a patient
     private boolean payed = false;
 
     public MPYH(int pyt, int ttm, Logging log, GUI gui) {
@@ -86,6 +89,7 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
             Thread.sleep((int) Math.floor(Math.random() * pyt));
 
             rl.lock();
+            // allow Patient to move on
             payed = true;
             cNotPayed.signal();
         } catch (InterruptedException e) {

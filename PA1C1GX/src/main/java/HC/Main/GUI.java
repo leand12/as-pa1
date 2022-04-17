@@ -20,6 +20,9 @@ import java.util.HashMap;
 import static HC.Data.ERoom.*;
 
 
+/**
+ * A UI to represent graphically the state of the simulation.
+ */
 public class GUI extends JFrame {
     private final EventQueue queue = new EventQueue();
     private final HashMap<TPatient, ERoom> patientsRoom = new HashMap<>();
@@ -78,6 +81,14 @@ public class GUI extends JFrame {
         };
     }
 
+    /**
+     * Adds a Patient to a room or switches the current room of a Patient
+     * and redraws the interface graphics accordingly. This method handles thread
+     * concurrency by dispatching this update to an event queue.
+     *
+     * @param room      the room where the Patient is currently.
+     * @param patient   the Patient that moved
+     */
     public void addPatient(ERoom room, TPatient patient) {
         try {
             queue.invokeAndWait(() -> {
@@ -93,6 +104,13 @@ public class GUI extends JFrame {
         }
     }
 
+    /**
+     * Removes the Patient from a room and redraws the interface graphics accordingly.
+     * This method handles thread concurrency by dispatching this update to an event queue.
+     *
+     * @param room      the room where the Patient is currently
+     * @param patient   the Patient that will be removed
+     */
     public void removePatient(ERoom room, TPatient patient) {
         try {
             queue.invokeAndWait(() -> {
@@ -106,6 +124,13 @@ public class GUI extends JFrame {
         }
     }
 
+    /**
+     * Redraws the interface graphics of a room.
+     * Useful to show the changes in the Patient's state,
+     * like DoS or NN, if there are any.
+     *
+     * @param room      the room where the Patient is currently
+     */
     public void updateRoom(ERoom room) {
         queue.invokeLater(() -> getRoomSeats(room).repaint());
     }

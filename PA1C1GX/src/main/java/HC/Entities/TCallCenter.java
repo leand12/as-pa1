@@ -1,30 +1,32 @@
 package HC.Entities;
 
 import HC.Data.ERoom_CC;
-import HC.Logging.Logging;
 import HC.Monitors.*;
 
 import java.util.HashMap;
 
 import static HC.Data.ERoom_CC.*;
 
-
+/**
+ * An auxiliary object used by the CallCenter to represent the rooms state.
+ * This allows the CallCenter to know if and when it should call a Patient to move between rooms.
+ */
 class Room {
-    private Occupation both;
-    private Occupation children;
-    private Occupation adults;
-    private Room next;
-    private final boolean needsCall;
-    private final String nome;
+    private Occupation both;            // a mix of adults and children occupation of a room
+    private Occupation children;        // the children occupation of a room
+    private Occupation adults;          // the adult occupation of a room
+    private Room next;                  // the following room that the Patient should enter
+    private final boolean needsCall;    // whether the Patient's in this room need permission to move
+    private final String name;          // the name of the room
 
-    public Room(String nome, int occ, int maxOcc, boolean needsCall) {
-        this.nome = nome;
+    public Room(String name, int occ, int maxOcc, boolean needsCall) {
+        this.name = name;
         both = new Occupation(occ, maxOcc);
         this.needsCall = needsCall;
     }
 
-    public Room(String nome, int childOcc, int childMaxOcc, int adultOcc, int adultMaxOcc, boolean needsCall) {
-        this.nome = nome;
+    public Room(String name, int childOcc, int childMaxOcc, int adultOcc, int adultMaxOcc, boolean needsCall) {
+        this.name = name;
         children = new Occupation(childOcc, childMaxOcc);
         adults = new Occupation(adultOcc, adultMaxOcc);
         this.needsCall = needsCall;
@@ -78,6 +80,11 @@ class Room {
         return next;
     }
 
+    /**
+     * Check if a Patient should be called to move to the next room.
+     *
+     * @return  an integer: 0 if inhibited, 1 to call an adult, 2 to call a child
+     */
     public int canCallPatient() {
         if (next == null)
             throw new IllegalCallerException("Room does not has a next room to move patient.");
@@ -88,19 +95,35 @@ class Room {
         return 0;
     }
 
+    /**
+     * Update the state of this room by adding a Patient in it.
+     *
+     * @param patient   the patient entering the room.
+     */
     public void addPatient(TPatient patient) {
         Occupation o = patient.isAdult() ? getAdults() : getChildren();
         o.increment();
     }
 
+    /**
+     * Update the state of this room by removing a Patient from it.
+     *
+     * @param patient   the patient exiting the room.
+     */
     public void removePatient(TPatient patient) {
         Occupation o = patient.isAdult() ? getAdults() : getChildren();
         o.decrement();
         if (needsCall) {
+            // call satisfied
             o.decrementCalls();
         }
     }
 
+    /**
+     * Update the state of this room by incrementing the number of calls made in it.
+     *
+     * @param isAdult   whether an adult or a child should be called
+     */
     public void callPatient(boolean isAdult) {
         if (isAdult)
             getAdults().incrementCalls();
@@ -108,6 +131,10 @@ class Room {
             getChildren().incrementCalls();
     }
 
+    /**
+     * Represents the state of a room, that is, the current occupation,
+     * maximum occupation and pending calls.
+     */
     class Occupation {
         private final int maxOcc;
         private int pendingCalls = 0;   // the calls from the CallCenter that were not completed
@@ -120,25 +147,25 @@ class Room {
 
         public void increment() {
             if (occ >= maxOcc)
-                throw new IllegalCallerException("Cannot increment occupation of " + nome + " when it's full.");
+                throw new IllegalCallerException("Cannot increment occupation of " + name + " when it's full.");
             occ++;
         }
 
         public void decrement() {
             if (occ <= 0)
-                throw new IllegalCallerException("Cannot decrement occupation of " + nome + " when it's empty.");
+                throw new IllegalCallerException("Cannot decrement occupation of " + name + " when it's empty.");
             occ--;
         }
 
         public void incrementCalls() {
             if (pendingCalls >= maxOcc)
-                throw new IllegalCallerException("Cannot increment calls of " + nome + " when it's full.");
+                throw new IllegalCallerException("Cannot increment calls of " + name + " when it's full.");
             pendingCalls++;
         }
 
         public void decrementCalls() {
             if (pendingCalls <= 0)
-                throw new IllegalCallerException("Cannot decrement calls of " + nome + " when it's empty.");
+                throw new IllegalCallerException("Cannot decrement calls of " + name + " when it's empty.");
             pendingCalls--;
         }
     }
@@ -146,18 +173,17 @@ class Room {
 
 
 public class TCallCenter extends Thread {
-    
     private volatile boolean threadSuspended;
     private boolean exit = false;
     
-    private final ICCH_CallCenter cch;         // call center hall
-    private final IETH_CallCenter eth;         // entrance hall
-    private final IWTH_CallCenter wth;         // waiting hall
-    private final IMDH_CallCenter mdh;         // medical hall
+    private final ICCH_CallCenter cch;          // call center hall
+    private final IETH_CallCenter eth;          // entrance hall
+    private final IWTH_CallCenter wth;          // waiting hall
+    private final IMDH_CallCenter mdh;          // medical hall
 
     private HashMap<ERoom_CC, Room> state = new HashMap<>();   // occupation state of the simulation
-    private boolean auto = true;
-    private boolean next = false;
+    private boolean auto = true;                // mode of the simulation (automatic | false)
+    private boolean next = false;               // trigger one move patient
 
     public TCallCenter(int NoS, int NoA, int NoC, ICCH_CallCenter cch, IETH_CallCenter eth, IWTH_CallCenter wth,
                        IMDH_CallCenter mdh) {
@@ -165,6 +191,8 @@ public class TCallCenter extends Thread {
         this.eth = eth;
         this.wth = wth;
         this.mdh = mdh;
+
+        /* initialize occupation state */
 
         int seats = NoS / 2;
 
@@ -215,7 +243,7 @@ public class TCallCenter extends Thread {
         while (!exit) {
             int callType;
 
-            // call patients
+            // call patients if conditions apply
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
                 state.get(ETH).callPatient(callType == 1);
@@ -241,12 +269,12 @@ public class TCallCenter extends Thread {
                 next = false;
             }
 
-            // receive notification
+            // receive the last exit notification
             var notif = cch.getNotification();
             ERoom_CC roomType = notif.room;
             TPatient patient = notif.patient;
 
-            // update state
+            // update the occupation state
             var room = state.get(roomType);
             room.removePatient(patient);
             var nextRoom = room.getNext();

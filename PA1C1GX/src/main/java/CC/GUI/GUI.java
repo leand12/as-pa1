@@ -8,6 +8,7 @@ import CC.Communication.ClientSocket;
 import javax.swing.JOptionPane;
 
 /**
+ * A UI to control and manipulate the configurations of the simulation.
  *
  * @author guids
  */
