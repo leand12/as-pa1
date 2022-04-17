@@ -4,6 +4,10 @@ import HC.Data.ERoom_CC;
 import HC.Monitors.*;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static HC.Data.ERoom_CC.*;
 
@@ -185,6 +189,9 @@ public class TCallCenter extends Thread {
     private boolean auto = true;                // mode of the simulation (automatic | false)
     private boolean next = false;               // trigger one move patient
 
+    private final ReentrantLock rl;
+    private final Condition cnext;
+
     public TCallCenter(int NoS, int NoA, int NoC, ICCH_CallCenter cch, IETH_CallCenter eth, IWTH_CallCenter wth,
                        IMDH_CallCenter mdh) {
         this.cch = cch;
@@ -215,14 +222,32 @@ public class TCallCenter extends Thread {
         state.put(WTRi, rwtri);
         state.put(MDW, rmdw);
         state.put(MDRi, rmdri);
+        
+        rl = new ReentrantLock();
+        cnext = rl.newCondition();
     }
 
     public void setAuto(boolean auto) {
         this.auto = auto;
+        if(auto){
+            try {
+                rl.lock();
+                cnext.signal();
+            } finally {
+                rl.unlock();
+            }
+        }
+        
     }
 
     public void allowNextPatient() {
-        this.next = true;
+        try {
+            rl.lock();
+            this.next = true;
+            cnext.signal();
+        } finally {
+            rl.unlock();
+        }
     }
     
     public synchronized void sus(){
@@ -237,12 +262,24 @@ public class TCallCenter extends Thread {
     public void exit(){
         exit = true;
     }
+    
+    
 
     @Override
     public void run() {
         while (!exit) {
             int callType;
-
+            if(!auto) {
+                try {
+                    rl.lock();
+                    cnext.await();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                } finally {
+                    rl.unlock();
+                }
+                
+            }
             // call patients if conditions apply
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
@@ -289,7 +326,5 @@ public class TCallCenter extends Thread {
                 }
             }
         }
-        
-        
     }
 }

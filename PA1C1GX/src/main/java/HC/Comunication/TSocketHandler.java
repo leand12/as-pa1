@@ -30,6 +30,7 @@ public class TSocketHandler extends Thread {
     @Override
     public void run() {
         TCallCenter callCenter = null;
+        boolean callCenterState = true;
         TCashier cashier = null;
         TPatient[] patients = null;
         TNurse[] nurses = null;
@@ -80,6 +81,7 @@ public class TSocketHandler extends Thread {
                             var pyh = new MPYH(PT, TTM, log, gui);
 
                             callCenter = new TCallCenter(NoS, NoA, NoC, cch, eth, wth, mdh);
+                            callCenter.setAuto(callCenterState);
                             callCenter.start();
                             
                             nurses = new TNurse[4];
@@ -108,14 +110,18 @@ public class TSocketHandler extends Thread {
                                 patients[NoA+i].start();
                             }
                             break;
-                        case "MODE":    // Mode selection
-                            if (callCenter != null) {
-                                if (clientMessage[1].equals("AUT")) {
+                        case "MODE":     // Mode selection
+                             {
+                                if (clientMessage[1].equals("AUTO")) {
                                     log.logState("AUT");
-                                    callCenter.setAuto(true);
-                                } else if (clientMessage[1].equals("MAN")) {
+                                    callCenterState = true;
+                                    if (callCenter != null)
+                                        callCenter.setAuto(true);
+                                } else if (clientMessage[1].equals("MANUAL")) {
                                     log.logState("MAN");
-                                    callCenter.setAuto(false);
+                                    callCenterState = false;
+                                    if (callCenter != null)
+                                        callCenter.setAuto(false);
                                 }
                             }
                             break;
