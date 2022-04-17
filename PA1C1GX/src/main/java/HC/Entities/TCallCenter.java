@@ -6,8 +6,15 @@ import HC.Monitors.*;
 import java.util.HashMap;
 
 import static HC.Data.ERoom_CC.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-
+/**
+ * 
+ * @author guids
+ */
 class Room {
     private Occupation both;
     private Occupation children;
@@ -152,6 +159,9 @@ public class TCallCenter extends Thread {
     private HashMap<ERoom_CC, Room> state = new HashMap<>();   // occupation state of the simulation
     private boolean auto = true;
     private boolean next = false;
+    
+    private final ReentrantLock rl;
+    private final Condition cnext;
 
     public TCallCenter(int NoS, int NoA, int NoC, ICCH_CallCenter cch, IETH_CallCenter eth, IWTH_CallCenter wth,
                        IMDH_CallCenter mdh) {
@@ -182,14 +192,32 @@ public class TCallCenter extends Thread {
         state.put(WTRi, rwtri);
         state.put(MDW, rmdw);
         state.put(MDRi, rmdri);
+        
+        rl = new ReentrantLock();
+        cnext = rl.newCondition();
     }
 
     public void setAuto(boolean auto) {
         this.auto = auto;
+        if(auto){
+            try {
+                rl.lock();
+                cnext.signal();
+            } finally {
+                rl.unlock();
+            }
+        }
+        
     }
 
     public void allowNextPatient() {
-        this.next = true;
+        try {
+            rl.lock();
+            this.next = true;
+            cnext.signal();
+        } finally {
+            rl.unlock();
+        }
     }
     
     public synchronized void sus(){
@@ -204,12 +232,24 @@ public class TCallCenter extends Thread {
     public void exit(){
         exit = true;
     }
+    
+    
 
     @Override
     public void run() {
         while (!exit) {
             int callType;
-
+            if(!auto){
+                try {
+                    rl.lock();
+                    cnext.await();
+                } catch (InterruptedException ex) {
+                    System.err.println(ex);
+                } finally {
+                    rl.unlock();
+                }
+                
+            }
             // call patients
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
