@@ -49,14 +49,13 @@ public class MEVH implements IEVH_Patient, IEVH_Nurse {
         try {
             rl.lock();
             while (isFull()) cNotFull.await();
-            patient.notifyExit(ETH);
 
             for (int i = 0; i < maxPatients; i++) {
                 // patient enters room
                 if (rooms[i] == null) {
                     patientCount++;
                     rooms[i] = patient;
-//                    patient.notifyExit(ETH);  // FIXME: should notify be called here?
+                    patient.notifyExit(ETH);
 
                     var room = ERoom.valueOf("EVR" + (i + 1));
                     log.logPatient(room, patient);

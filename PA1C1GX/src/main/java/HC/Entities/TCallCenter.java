@@ -283,6 +283,7 @@ public class TCallCenter extends Thread {
             // call patients if conditions apply
             callType = state.get(ETH).canCallPatient();
             if (callType != 0 && (auto || next)) {
+                state.get(ETH);
                 state.get(ETH).callPatient(callType == 1);
                 eth.callPatient(callType == 1);
                 next = false;

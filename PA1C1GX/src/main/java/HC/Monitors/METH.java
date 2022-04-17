@@ -91,7 +91,7 @@ public class METH implements IETH_Patient, IETH_CallCenter {
         private int idxPut = 0;
         private int idxGet = 0;
         private int count = 0;
-        private final boolean permitted[];    // ensures a Patient keeps running if signal is performed before await
+        private final boolean[] permitted;    // ensures a Patient keeps running if signal is performed before await
 
         public MFIFO(ReentrantLock rl, int size) {
             this.size = size;
@@ -110,6 +110,7 @@ public class METH implements IETH_Patient, IETH_CallCenter {
             try {
                 rl.lock();
                 while (isFull()) cNotFull.await();
+                System.out.println("Entrou patient " + patient + " pq count=" + count);
                 count++;
                 fifo[idxPut] = patient;
                 int idx = idxPut;
@@ -143,6 +144,9 @@ public class METH implements IETH_Patient, IETH_CallCenter {
                 }
                 while (!permitted[idx]) cond[idx].await();
                 permitted[idx] = false;
+                fifo[idx] = null;
+                count--;
+                gui.removePatient(room, patient);
                 cNotFull.signal();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -154,10 +158,8 @@ public class METH implements IETH_Patient, IETH_CallCenter {
         public void get() {
             try {
                 rl.lock();
-                while (isEmpty()) cNotEmpty.await();
-                count--;
-                fifo[idxGet] = null;
                 int idx = idxGet;
+                while (isEmpty() || permitted[idx]) cNotEmpty.await();
                 idxGet = (++idxGet) % size;
                 // allow Patient to move on
                 permitted[idx] = true;
@@ -177,11 +179,11 @@ public class METH implements IETH_Patient, IETH_CallCenter {
         }
 
         public boolean isFull() {
-            return count == size;
+            return count >= size;
         }
 
         public boolean isEmpty() {
-            return count == 0;
+            return count <= 0;
         }
     }
 }
