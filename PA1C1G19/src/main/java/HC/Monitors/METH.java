@@ -110,7 +110,6 @@ public class METH implements IETH_Patient, IETH_CallCenter {
             try {
                 rl.lock();
                 while (isFull()) cNotFull.await();
-                System.out.println("Entrou patient " + patient + " pq count=" + count);
                 count++;
                 fifo[idxPut] = patient;
                 int idx = idxPut;
