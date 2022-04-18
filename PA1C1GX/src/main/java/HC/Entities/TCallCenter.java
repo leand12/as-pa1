@@ -176,6 +176,9 @@ class Room {
 }
 
 
+/**
+ * The thread entity that partially supervises the movement of patients. There should only exist one.
+ */
 public class TCallCenter extends Thread {
     private volatile boolean threadSuspended;
     private boolean exit = false;

@@ -2,8 +2,11 @@ package HC.Entities;
 
 import HC.Monitors.IPYH_Cashier;
 
+
+/**
+ * The thread entity that accepts the payment.
+ */
 public class TCashier extends Thread {
-    
     private volatile boolean threadSuspended;
     private  boolean exit = false;
     private final IPYH_Cashier pyh;

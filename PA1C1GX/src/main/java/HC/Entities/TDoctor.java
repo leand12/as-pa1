@@ -2,6 +2,9 @@ package HC.Entities;
 
 import HC.Monitors.IMDH_Doctor;
 
+/**
+ * The thread entity that performs the medical appointment.
+ */
 public class TDoctor extends Thread {
     private volatile boolean threadSuspended;
     private boolean exit = false;

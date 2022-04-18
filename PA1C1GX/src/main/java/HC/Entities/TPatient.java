@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The thread entity willing a medical appointment.
  *
  * @author guids
  */
