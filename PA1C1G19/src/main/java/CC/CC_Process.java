@@ -9,15 +9,13 @@ import CC.Communication.ClientSocket;
 
 
 /**
+ * The Control Center Process, where configuration, control and supervision takes place.
  *
  * @author guids
  */
-public class Main {
-    
-    
-    
+public class CC_Process {
+
     public static void main(String[ ] args) {
-        
         ClientSocket socket = new ClientSocket(5000, "127.0.0.1");
         socket.creatSocket();
         
@@ -25,9 +23,5 @@ public class Main {
         gui.setVisible(true);
         
         System.out.println("CC begining:");
-        
-        
-        
     }
-    
 }

@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * The thread entity willing a medical appointment.
  *
  * @author guids
  */
@@ -27,9 +28,9 @@ public class TPatient extends Thread {
     private final IMDH_Patient mdh;         // medical hall
     private final IPYH_Patient pyh;         // payment hall
 
-    private int NN;            // entrance hall number
+    private int NN;                         // ETN, WTN or PYN
     private boolean isAdult;
-    private EDoS dos = EDoS.NONE;            // degree of severity
+    private EDoS dos = EDoS.NONE;           // degree of severity
 
     public TPatient(boolean isAdult, ICCH_Patient cch, IETH_Patient eth, IEVH_Patient evh, IWTH_Patient wth,
                     IMDH_Patient mdh, IPYH_Patient pyh) {

@@ -9,13 +9,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Monitor Call Center Hall, responsible for managing the movement of all Patients.
+ * Call Center Hall Monitor, responsible for managing the movement of all Patients.
  */
 public class MCCH implements ICCH_Patient, ICCH_CallCenter {
     private final ReentrantLock rl;
     private final Condition cNotEmpty;
 
-    private final LinkedList<Notification> notifications;
+    private final LinkedList<Notification> notifications;   // an unlimited size FIFO of notifications
 
     public MCCH() {
         rl = new ReentrantLock();
@@ -27,7 +27,10 @@ public class MCCH implements ICCH_Patient, ICCH_CallCenter {
     public Notification getNotification() {
         try {
             rl.lock();
-            while (notifications.isEmpty()) cNotEmpty.await();
+            while (notifications.isEmpty()) {
+                // wait for patient notification
+                cNotEmpty.await();
+            }
             return notifications.pollFirst();
 
         } catch (InterruptedException e) {

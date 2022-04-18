@@ -13,31 +13,28 @@ import java.util.concurrent.locks.ReentrantLock;
 import static HC.Data.ERoom.*;
 import static HC.Data.ERoom_CC.EVH;
 
+/**
+ * Waiting Hall Monitor, the first Hall where patients wait for their medical appointment.
+ */
 public class MWTH implements IWTH_CallCenter, IWTH_Patient {
-
     private final ReentrantLock rl;
-
     private final MFIFO redChildFIFO, yellowChildFIFO, blueChildFIFO,
             redAdultFIFO, yellowAdultFIFO, blueAdultFIFO;
-
-
     private final Logging log;
     private final GUI gui;
     private final int NoS;
     private final int ttm;
     private int ccount = 0;
     private int acount = 0;
-    private int WTN = 0; // Patient Number
-    private int nextWTN =1;
+    private int WTN = 0;        // Patient Number
+    private int nextWTN = 1;
 
     private Condition cNotBothEmpty;
     private final Condition cDoSNotEmpty;
     private Condition cNextWTN;
 
-    private final MFIFO challFIFO;
-    private final MFIFO ahallFIFO;
-
-
+    private final MFIFO challFIFO;  // the representation of the children in the WTH
+    private final MFIFO ahallFIFO;  // the representation of the adults in the WTH
 
     public MWTH(int NoS, int ttm, Logging log, GUI gui){
         this.NoS = NoS;
@@ -185,12 +182,11 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
             try {
                 rl.lock();
 
-                // asign WTN
+                // assign WTN
                 patient.setNN(++WTN);
                 log.logPatient(ERoom.WTH, patient);
                 gui.addPatient(ERoom.WTH, patient);
 
-                // wait for CH call
                 while (isFull()) cNotFull.await();
 
                 patient.notifyExit(EVH);
@@ -203,6 +199,7 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
                 cNotEmpty.signal();
                 cNotBothEmpty.signal();     // signal CallCenter
 
+                // wait for CallCenter call
                 while (!permitted[idx]) cond[idx].await();
                 permitted[idx] = false;
 
@@ -227,8 +224,8 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
                 int idx = idxPut;
                 idxPut = (++idxPut) % size;
                 cNotEmpty.signal();
-                cDoSNotEmpty.signal(); // signal CallCenter
-                while (!permitted[idx]) cond[idx].await(); // wait for CC call
+                cDoSNotEmpty.signal();                      // signal CallCenter
+                while (!permitted[idx]) cond[idx].await();  // wait for CallCenter call
                 permitted[idx] = false;
                 cNotFull.signal();
             } catch (InterruptedException e) {
@@ -237,7 +234,6 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
                 rl.unlock();
             }
         }
-
 
         public void get() {
             try {
@@ -253,7 +249,7 @@ public class MWTH implements IWTH_CallCenter, IWTH_Patient {
                 Thread.sleep((int) Math.floor(Math.random() * ttm));
 
                 rl.lock();
-
+                // allow Patient to move on
                 permitted[idx] = true;
                 cond[idx].signal();
             } catch (InterruptedException e) {

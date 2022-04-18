@@ -1,0 +1,10 @@
+CC
+CC.Communication
+CC.GUI
+HC
+HC.Comunication
+HC.Data
+HC.Entities
+HC.Logging
+HC.Main
+HC.Monitors

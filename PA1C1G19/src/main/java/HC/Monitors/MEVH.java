@@ -12,16 +12,19 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static HC.Data.ERoom_CC.ETH;
 
+/**
+ * Evaluation Hall Monitor, where the DoS is evaluated for each patient.
+ */
 public class MEVH implements IEVH_Patient, IEVH_Nurse {
     private final ReentrantLock rl;
     private final Condition cNotFull;
     private final Condition[] cNotEvaluated;
     private final Logging log;
     private final GUI gui;
-    private final TPatient[] rooms;
+    private final TPatient[] rooms;     // represents the rooms EVR1, EVR2, EVR3 and EVR4
     private final boolean[] evaluated;
-    private final int ttm;
-    private final int evt;      // evaluation time
+    private final int ttm;              // time to move
+    private final int evt;              // evaluation time
     private final int maxPatients = 4;
 
     private int patientCount = 0;
@@ -46,14 +49,13 @@ public class MEVH implements IEVH_Patient, IEVH_Nurse {
         try {
             rl.lock();
             while (isFull()) cNotFull.await();
-            patient.notifyExit(ETH);
 
             for (int i = 0; i < maxPatients; i++) {
                 // patient enters room
                 if (rooms[i] == null) {
                     patientCount++;
                     rooms[i] = patient;
-//                    patient.notifyExit(ETH);  // FIXME: should notify be called here?
+                    patient.notifyExit(ETH);
 
                     var room = ERoom.valueOf("EVR" + (i + 1));
                     log.logPatient(room, patient);
@@ -99,6 +101,7 @@ public class MEVH implements IEVH_Patient, IEVH_Nurse {
             rooms[idx].setDos(dos);
 
             rl.lock();
+            // allow Patient to move on
             evaluated[idx] = true;
             cNotEvaluated[idx].signal();
         } catch (InterruptedException e) {

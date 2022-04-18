@@ -7,6 +7,8 @@ package HC.Entities;
 import HC.Monitors.IEVH_Nurse;
 
 /**
+ * The thread entity that evaluates patients regarding their DoS (degree of severity).
+ *
  * @author guids
  */
 public class TNurse extends Thread {

@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * Used to log messages to monitor the state of the simulation.
+ * Handles concurrency by printing and writing the message to a file synchronously.
+ *
  * @author guids
  */
 public class Logging {

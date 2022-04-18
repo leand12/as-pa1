@@ -6,9 +6,9 @@ package HC.Data;
  */
 public enum ERoom_CC {
     ETH,
-    EVH,  //*
+    EVH,
     WTH,
     WTRi,
     MDW,
-    MDRi, //*
+    MDRi,
 }

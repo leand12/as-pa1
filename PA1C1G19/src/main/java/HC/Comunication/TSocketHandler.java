@@ -15,10 +15,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 /**
+ * Handle the client socket messages to manipulate the simulation
+ * according to the client's commands and configurations.
+ *
  * @author guids
  */
 public class TSocketHandler extends Thread {
-
     private final Socket socket;
 
     public TSocketHandler(Socket socket) {
@@ -50,23 +52,22 @@ public class TSocketHandler extends Thread {
             log.logState("INI");
 
             while (true) {
+                // keep listening to incoming messages
                 if ((inputLine = in.readLine()) != null) {
                     String[] clientMessage = inputLine.split(":");
 
                     switch (clientMessage[0]) {
                         //NoA:NoC:NoS:PT:ET:MAT:TTM:Mode
-                        case "CONFIG":
-
-                            //INIT
+                        case "CONFIG":  // Start button
                             log.logState("RUN");
 
-                            NoA = Integer.parseInt(clientMessage[1]);
-                            NoC = Integer.parseInt(clientMessage[2]);
-                            NoS = Integer.parseInt(clientMessage[3]);
-                            PT = Integer.parseInt(clientMessage[4]);
-                            ET = Integer.parseInt(clientMessage[5]);
-                            MAT = Integer.parseInt(clientMessage[6]);
-                            TTM = Integer.parseInt(clientMessage[7]);
+                            NoA = Integer.parseInt(clientMessage[1]);   // number of adults
+                            NoC = Integer.parseInt(clientMessage[2]);   // number of children
+                            NoS = Integer.parseInt(clientMessage[3]);   // number of seats
+                            PT = Integer.parseInt(clientMessage[4]);    // payment time
+                            ET = Integer.parseInt(clientMessage[5]);    // evaluation time
+                            MAT = Integer.parseInt(clientMessage[6]);   // medical appointment time
+                            TTM = Integer.parseInt(clientMessage[7]);   // time to move
                             mode = clientMessage[8];
 
                             gui = new GUI(NoA, NoC, NoS);
@@ -109,7 +110,7 @@ public class TSocketHandler extends Thread {
                                 patients[NoA+i].start();
                             }
                             break;
-                        case "MODE":
+                        case "MODE":     // Mode selection
                              {
                                 if (clientMessage[1].equals("AUTO")) {
                                     log.logState("AUT");
@@ -124,7 +125,7 @@ public class TSocketHandler extends Thread {
                                 }
                             }
                             break;
-                        case "NEXT":
+                        case "NEXT":    // Move patient button
                             if (callCenter != null) {
                                 callCenter.allowNextPatient();
                             }
@@ -141,7 +142,7 @@ public class TSocketHandler extends Thread {
                             }
                             
                             break;
-                        case "SUS":
+                        case "SUS":     // Suspend button
                             for(int i =0; i< NoA+NoC; i++){
                                 patients[i].sus();
                             }
@@ -152,7 +153,7 @@ public class TSocketHandler extends Thread {
                             callCenter.sus();
                             cashier.sus();
                             break;
-                        case "STO":
+                        case "STO":     // Stop button
                             callCenter.exit();
                             cashier.exit();
                             for(int i =0; i< 4; i++){
@@ -166,7 +167,7 @@ public class TSocketHandler extends Thread {
                             TNurse.resetId();
                             TDoctor.resetId();
                             break;
-                        case "END":
+                        case "END":     // End button
                             socket.close();
                             System.exit(0);
                             break;
@@ -179,4 +180,4 @@ public class TSocketHandler extends Thread {
     }
 }
 
-/* http://docs.oracle.com/javase/8/docs /technotes/guides/concurrency/threadPrimitiveDeprecation.html */
+/* http://docs.oracle.com/javase/8/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html */
