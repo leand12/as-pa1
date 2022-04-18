@@ -25,6 +25,7 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
 
     private final int ttm;      // time to move
     private final int pyt;      // payment time
+    private int PYN = 0;        // Patient Number
 
     private boolean occupied = false;   // whether cashier is occupied with a patient
     private boolean payed = false;
@@ -47,6 +48,8 @@ public class MPYH implements IPYH_Patient, IPYH_Cashier {
             patient.notifyExit(MDRi);
 
             // enter PYH
+            // assign PYN
+            patient.setNN(++PYN);
             log.logPatient(PYH, patient);
             gui.addPatient(PYH, patient);
 
