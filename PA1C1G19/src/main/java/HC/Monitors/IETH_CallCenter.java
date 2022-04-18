@@ -1,4 +1,5 @@
 package HC.Monitors;
 
-public interface IETH_CallCenter extends IHall_CallCenter {
+public interface IETH_CallCenter {
+    void callPatient();
 }
